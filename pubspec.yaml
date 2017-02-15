@@ -1,14 +1,17 @@
 name: typewriter
 description: A starting point for Dart libraries or applications.
 version: 0.0.1
-#author: Jonah Williams <email@example.com>
+author: Jonah Williams <jonahwilliams@google.com>
 #homepage: https://www.example.com
 
 environment:
   sdk: '>=1.0.0 <2.0.0'
 
-#dependencies:
-#  lib_name: any
+dependencies:
+  analyzer:
+  quiver:
+  source_gen:
+  build_runner:
 
 dev_dependencies:
   test: '>=0.12.0 <0.13.0'
