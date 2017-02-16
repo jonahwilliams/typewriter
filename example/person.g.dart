@@ -7,16 +7,17 @@ part of typewriter.example.person;
 // Target: class Person
 // **************************************************************************
 
-class PersonXmlDecoder extends Converter<XmlNode, Person> {
+class PersonXmlDecoder extends Converter<Person, XmlNode> {
   const PersonXmlDecoder();
 
   Person convert(XmlNode input) {
     final output = new Person();
 
-    output.name = findElements("name").first.text;
-    output.age = findElements("age").first.text;
-    output.money = findElements("money").first.text;
-    output.isAlive = findElements("isAlive").first.text;
+    output.name = input.findElements("name").first.text;
+    output.age = input.findElements("age").first.text;
+    output.money = input.findElements("money").first.text;
+    output.isAlive = input.findElements("isAlive").first.text;
+    output.birthday = input.findElements("birthday").first.text;
     return output;
   }
 }
@@ -40,20 +41,23 @@ class PersonXmlEncoder extends Converter<Person, XmlNode> {
       output.element("isAlive", nest: () {
         output.text(input.isAlive);
       });
+      output.element("birthday", nest: () {
+        output.text(input.birthday);
+      });
     });
     return output.build();
   }
 }
 
-class PersonXmlCodec extends Codec<Object, XmlNode> {
-  static const _encoder = const PersonXmlEncoder();
-  static const _decoder = const PersonXmlDecoder();
+class PersonXmlCodec extends Codec<Person, XmlNode> {
+  static const PersonXmlEncoder _encoder = const PersonXmlEncoder();
+  static const PersonXmlDecoder _decoder = const PersonXmlDecoder();
 
   const PersonXmlCodec();
 
   @override
-  Converter<String, XmlNode> get encoder => _encoder;
+  Converter<Person, XmlNode> get encoder => _encoder;
 
   @override
-  Converter<XmlNode, String> get decoder => _decoder;
+  Converter<XmlNode, Person> get decoder => _decoder;
 }

@@ -9,7 +9,8 @@ void main() {
       ..name = "Jonah"
       ..age = 25
       ..money = 100.0
-      ..isAlive = true;
+      ..isAlive = true
+      ..birthday = new DateTime.now();
 
-    print(xmlCodec.encode(codec.encode(person)));
+    print(codec.encode(person));
 }

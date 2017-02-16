@@ -7,9 +7,10 @@ part 'person.g.dart';
 
 class Person {
   Person();
-
   String name;
   int age;
   double money;
   bool isAlive;
+  DateTime birthday;
 }
+

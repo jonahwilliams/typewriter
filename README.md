@@ -10,11 +10,10 @@ A Jackson-like library for dart serialization.  It's high level goals are,
   Annotation based configuration instead of configuration files.
 
 
-## Initial version API
-
-
 Given a simple Dart class like this, generate an encoder/decoder class for any
 number of different serialization formats.
+
+
 ```dart
 class Person {
   int age;
@@ -35,17 +34,8 @@ Object convert(Person person) {
 }
 ```
 
-In the future, it would be easier to support parsing directly to
- a String, (if that is faster)
-```
-String convert(Person person) {
-    return '''{
-      "age": ${person.age},
-      "birthday": "${person.birthday.toIso8601String()}",
-      "name": "${person.name}"
-    }''';
-}
-```
+Eventually this library will need to handle fields of other serializable objects, and well,
+lists and typed maps.
 
 
 ## Design
@@ -62,93 +52,56 @@ class Foo {
   String fooBar;
 }
 ```
+
+```json
+{ "foo_bar": "My foo's"}
+```
+
+Or making a field into an attribute on an Xml node
+
+```dart
+class Bar {
+  String language;
+
+  @Attribute()
+  int id;
+}
+```
+
+```xml
+<?xml version="1.0"?>
+<Bar id="23">
+  <language>English</language>
+</Bar>
+```
+
+
 These annotations will be added as configuration needs are discovered.
 
-### Class Analyzer
-The class analyzer produces a description of a class which a codec can be
-created from. For example, in the above class Person, the analyzer will examine
-the ClassElement and find the type and name of all public fields.  There are
-actually several different strategies towards analyzing classes - ideally as
-many as necessary could be supported.
+### Analysis
+Use the analyzer to inspect the fields, constructors, types of a class and produce a description of the
+necessary codec logic.
 
-  * Pojo (Podo?) style.
-    Only accept classes with a default constructor and all public fields.  This
-    is the easiest to implement, but leaves out immutable classes and
-    initialization logic.
-  * Annotated constructor.
-    Handle the above, but also allow an annotated constructor and final fields.
-    Find some heuristic to match a constructor argument with a final field to
-    assure that all are covered.
+For now it only accepts classes with a no argument default constructor, all public fields, et cetera.
+This is the easiest to implement, but leaves out immutable classes and initialization logic.
 
-Todos here:
+In later versions, we can handle the above, but also allow an annotated constructor and final fields.
+Using some heuristic to match a constructor argument with a final field to assure that everything can
+be initialized.
 
-1. How do I get type information from a class, i.e. use DartType?
-2. How can I match up setters and getters - only to the same private field?
-3. How do I analyze constructor arguments.
-4. How to handle inheritance? I am leaning towards ignoring it.
+Support for Inheritance and Generics will be considered If it makes sense at some point in the future.
+
+
+### Writers
+using the class description from analysis, generate a class which can encode and decode.
+
+A Codec is generated for each target language, then that codec is fused with the language specific
+serializer to produce a codec capable of converting between a type and it's xml/json string representation.
+```
+  [Class Person] --> [Codec: Person -> Xml]  + [Codec Xml -> String]
+                 --> [Codec: Person -> Json] + [Codec Json -> String]
 
 ```
-abstract class ClassDescription {
-  String get name;
-  DartType get type;
-  List<FieldDescription> get fields;
-}
-
-abstract class FieldDescription {
-  String get name;
-  String get field;
-  DartType get type;
-}
-```
-### Codec Generator
-The codec generator takes a ClassDescription and produces some sort of codec
-based on it.  It needs to know what the output type is as well, how to abstract
-this?
-
-Here we could use the existing JSON codec (will this work for xml, yaml, proto,
-  avro, et cetera?)
-```
-Codec<String, Object> + Codec<Object, Foo>
-```
-
-Probably not, but at some point we'd need an intermediary format for all of
-these parsers ... why?  for nesting. In general there are several different
-things that need to be done.
-
-1. Match dart type to source type
-    for example Dart to JSON
-      String -> String,
-      int -> int,
-      double -> double,
-      bool -> boolean,
-      DateTime -> String,
-      Int64 -> String
-      Person -> { name :: String, age :: double }
-
-    So there are several issues here, one is there are 'simple' types like
-    DateTime and Int64 which have only one value.  Then there are more complex
-    types like our Person type, which needs to map to an object, or be nested
-    in someway.
-
-For DateTime
-```dart
-String encode(DateTime dateTime) => dateTime.toIso8601String();
-
-DateTime decode(String input) => DateTime.parse(input);
-```
-
-But complex types either need to go straight to a string or to an intermediary
-format.  In the case of JSON, this would be a Map<String, dynamic>
-
-Do I need to make a distinction between 'Simple' types and complex ones? or
-can this be handled entire though an input -> output type map
-
-1. Given a DartType and a Destination, Determine DestinationType.  this should
- probably be fixed for basic and stdlib types.
-  DateTime + JSON -> String
-2. Lookup DartType -> DestinationType function
-  String encode(DateTime dateTime) => dateTime.toIso8601String()
-
 
 
 ### Build Process (In progress)

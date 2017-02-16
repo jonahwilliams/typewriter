@@ -12,7 +12,7 @@ class XmlWriter extends Writer {
     // this format also depends on the type of strategy used, like
     // what kind of constructor.  this is hardcoded for the simple strategy
     buffer.write('''
-    class ${name}XmlDecoder extends Converter<XmlNode, $name> {
+    class ${name}XmlDecoder extends Converter<$name, XmlNode> {
       const ${name}XmlDecoder();
 
       $name convert(XmlNode input) {
@@ -21,7 +21,7 @@ class XmlWriter extends Writer {
     ''');
     for (final field in description.fields) {
       // This is a hack because I haven't figured out a nice interface.
-      buffer.writeln('output.${field.name} = findElements("${field.name}").first.text;');
+      buffer.writeln('output.${field.name} = input.findElements("${field.name}").first.text;');
     }
     buffer.write('''
         return output;
@@ -60,17 +60,17 @@ class XmlWriter extends Writer {
     ///
     ///
     buffer.writeln('''
-    class ${name}XmlCodec extends Codec<XmlNode, $name> {
-      static const _encoder = const ${name}XmlEncoder();
-      static const _decoder = const ${name}XmlDecoder();
+    class ${name}XmlCodec extends Codec<$name, XmlNode> {
+      static const PersonXmlEncoder _encoder = const PersonXmlEncoder();
+      static const PersonXmlDecoder _decoder = const PersonXmlDecoder();
 
       const ${name}XmlCodec();
 
       @override
-      Converter<String, XmlNode> get encoder => _encoder;
+      Converter<$name, XmlNode> get encoder => _encoder;
 
       @override
-      Converter<XmlNode, String> get decoder => _decoder;
+      Converter<XmlNode, $name> get decoder => _decoder;
     }
     ''');
     return buffer.toString();
