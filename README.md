@@ -2,13 +2,12 @@
 A Jackson-like library for dart serialization.  It's high level goals are,
 
 1. Performance
-  Use code generation instead of mirrors/meta-programming to create serializers
-  which are as performant as you would write by hand
-2. Easy to use
-  Use sane defaults and helpful errors/documentation.
-3. Lightly configurable
-  Annotation based configuration instead of configuration files.
 
+Use code generation instead of mirrors/meta-programming to create codecs which are as performant as those written by hand.
+
+2. Easy to use
+
+Use sane defaults and helpful errors/documentation.
 
 Given a simple Dart class like this, generate an encoder/decoder class for any
 number of different serialization formats.
@@ -22,8 +21,8 @@ class Person {
 }
 ```
 
-For example a JSON codec might work by first converting the object into
-something that can already be serialized by dart's JSON parser.
+Typewriter would generate a codec, containing code which looks something like this.
+
 ```dart
 Object convert(Person person) {
    return {
@@ -33,9 +32,6 @@ Object convert(Person person) {
    };
 }
 ```
-
-Eventually this library will need to handle fields of other serializable objects, and well,
-lists and typed maps.
 
 
 ## Design
