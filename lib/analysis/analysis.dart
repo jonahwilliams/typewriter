@@ -18,6 +18,9 @@ class ClassDescription {
       other is ClassDescription &&
       other.type == type &&
       listsEqual(other.fields, fields);
+
+  @override
+  String toString() => 'ClassDescription for $type\n$fields';
 }
 
 /// Type information and metadata for a field to be serialized.
@@ -33,6 +36,9 @@ class FieldDescription {
   @override
   bool operator ==(Object other) =>
       other is FieldDescription && other.name == name && other.type == type;
+
+  @override
+  String toString() => 'FieldDescription $name $type';
 }
 
 /// A way of determining if a class can be serialized.

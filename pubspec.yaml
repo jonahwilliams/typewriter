@@ -13,7 +13,8 @@ dependencies:
   source_gen:
   build_runner:
   yaml:
-  xml: 2.5.0 
+  xml: 2.5.0
+  resolver:
 
 dev_dependencies:
   test: '>=0.12.0 <0.13.0'

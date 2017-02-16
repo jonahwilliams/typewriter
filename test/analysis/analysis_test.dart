@@ -1,51 +1,41 @@
 import 'package:test/test.dart';
 import 'package:typewriter/analysis/analysis.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/src/generated/type_system.dart';
 import 'package:analyzer/analyzer.dart';
-
-
-// TODO: a better way to get `DartTypes` since this only works
-// for the built in types.
-DartType getDartType(String typeName) {
-  final raw = '$typeName foo';
-  final unit = parseCompilationUnit(raw).declarations.first;
-  return unit.variables.type;
-}
-
-DartType stringType = getDartType('String');
-DartType boolType = getDartType('bool');
-DartType doubleType = getDartType('double');
-DartType intType = getDartType('intType');
-DartType dateTimeType = getDartType('DartType');
-
+import 'package:resolver/resolver.dart';
+import 'package:analyzer/src/generated/resolver.dart' show TypeProviderImpl;
 
 void main() {
   group('SimpleStrategy', () {
     AnalysisStrategy strategy;
+    Resolver resolver;
+    TypeProvider typeProvider;
 
     setUp(() {
       strategy = const SimpleStrategy();
+      resolver = new Resolver();
+      typeProvider = new TypeProviderImpl();
     });
 
-    test('works on plain dart objects', () {
+    test('works on plain dart objects', () async {
       final source = '''
         class Foo {
           String name;
           int age;
           DateTime birthday;
-        }
-      ''';
-      final ast = parseCompilationUnit(source);
-      final element = (ast.declarations.first as ClassDeclaration).element;
+        }''';
+      final library = await resolver.resolveSourceCode(source);
+      final element = library.getType('Foo');
 
       expect(strategy.analyze(element).fields, unorderedEquals([
-        new FieldDescription('name', stringType),
-        new FieldDescription('int', intType),
-        new FieldDescription('DateTime', dateTimeType),
+        new FieldDescription('name', TypeProviderBase.),
+        new FieldDescription('int', null),
+        new FieldDescription('DateTime', null),
       ]));
     });
 
-    test('doesnt work on classes with inheritance', () {
+    test('does not work on classes with inheritance', () async {
       final source = '''
         class Bar {}
 
@@ -53,25 +43,23 @@ void main() {
           String name;
         }
       ''';
-      final ast = parseCompilationUnit(source);
-      final element = (ast.declarations.skip(1).first as ClassDeclaration).element;
+      final library = await resolver.resolveSourceCode(source);
+      final element = library.getType('Foo');
 
-      expect(strategy.analyze(element), throwsException);
+      expect(() => strategy.analyze(element), throwsException);
     });
 
-    test('doesnt work on classes with final fields', () {
+    test('does not work on classes with final fields', () async {
       final source = '''
         class Foo {
           String name;
           final bar = 2;
         }
       ''';
+      final library = await resolver.resolveSourceCode(source);
+      final element = library.getType('Foo');
 
-      final ast = parseCompilationUnit(source);
-      final element = (ast.declarations.first as ClassDeclaration).element;
-
-      expect(strategy.analyze(element), throwsException);
+      expect(() => strategy.analyze(element), throwsException);
     });
-
   });
 }
