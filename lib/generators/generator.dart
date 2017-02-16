@@ -7,15 +7,15 @@ import '../writer/writer.dart';
 import '../analysis/analysis.dart';
 
 class TypewriterGenerator extends Generator {
-  static const Writer _defaultWriter = const Writer();
-  static const AnalysisStrategy _defaultAnalysis = const SimpleStrategy();
+  final AnalysisStrategy strategy;
+  final Writer writer;
 
-  const TypewriterGenerator();
+  const TypewriterGenerator(this.writer, this.strategy);
 
   Future<String> generate(Element element, _) async {
     if (element is ClassElement) {
-      final description = _defaultAnalysis.analyze(element);
-      return _defaultWriter.write(description);
+      final description = strategy.analyze(element);
+      return writer.write(description);
     }
     return null;
   }

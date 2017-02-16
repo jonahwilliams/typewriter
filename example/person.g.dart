@@ -7,44 +7,53 @@ part of typewriter.example.person;
 // Target: class Person
 // **************************************************************************
 
-class PersonDecoder extends Converter<Object, Person> {
-  const PersonDecoder();
+class PersonXmlDecoder extends Converter<XmlNode, Person> {
+  const PersonXmlDecoder();
 
-  Person convert(Object raw) {
-    final input = raw as Map<String, dynamic>;
+  Person convert(XmlNode input) {
     final output = new Person();
 
-    output.name = input["name"];
-    output.age = input["age"];
-    output.money = input["money"];
-    output.isAlive = input["isAlive"];
+    output.name = findElements("name").first.text;
+    output.age = findElements("age").first.text;
+    output.money = findElements("money").first.text;
+    output.isAlive = findElements("isAlive").first.text;
     return output;
   }
 }
 
-class PersonEncoder extends Converter<Person, Object> {
-  const PersonEncoder();
+class PersonXmlEncoder extends Converter<Person, XmlNode> {
+  const PersonXmlEncoder();
 
-  Object convert(Person input) {
-    final output = <String, dynamic>{};
-
-    output["name"] = input.name;
-    output["age"] = input.age;
-    output["money"] = input.money;
-    output["isAlive"] = input.isAlive;
-    return output;
+  XmlNode convert(Person input) {
+    final output = new XmlBuilder();
+    output.processing('xml', 'version="1.0"');
+    output.element("Person", nest: () {
+      output.element("name", nest: () {
+        output.text(input.name);
+      });
+      output.element("age", nest: () {
+        output.text(input.age);
+      });
+      output.element("money", nest: () {
+        output.text(input.money);
+      });
+      output.element("isAlive", nest: () {
+        output.text(input.isAlive);
+      });
+    });
+    return output.build();
   }
 }
 
-class PersonCodec extends Codec<Object, Person> {
-  static const _encoder = const PersonEncoder();
-  static const _decoder = const PersonDecoder();
+class PersonXmlCodec extends Codec<Object, XmlNode> {
+  static const _encoder = const PersonXmlEncoder();
+  static const _decoder = const PersonXmlDecoder();
 
-  const PersonCodec();
-
-  @override
-  Converter<String, Object> get encoder => _encoder;
+  const PersonXmlCodec();
 
   @override
-  Converter<Object, String> get decoder => _decoder;
+  Converter<String, XmlNode> get encoder => _encoder;
+
+  @override
+  Converter<XmlNode, String> get decoder => _decoder;
 }
