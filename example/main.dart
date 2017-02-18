@@ -1,16 +1,18 @@
-import 'person.dart';
-import 'package:typewriter/codecs/codecs.dart';
+library typewriter.example;
+
+import 'lib/codecs/codecs.dart';
+import 'lib/person.dart';
+import 'lib/dog.dart';
+import 'lib/item.dart';
 
 void main() {
-    const codec = const PersonXmlCodec();
-    const xmlCodec = const XmlCodec();
-
-    final person = new Person()
-      ..name = "Jonah"
+  final person = new Person()
+      ..name = 'Jonah'
       ..age = 25
-      ..money = 100.0
-      ..isAlive = true
-      ..birthday = new DateTime.now();
+      ..birthday = new DateTime.now()
+      ..dog = (new Dog()..name = 'Ruffles' ..age = 1 ..birthday = new DateTime(2016))
+      ..item = (new Item()..description = "This is a test item" ..id = 2);
 
-    print(codec.encode(person));
+  print(personJsonCodec.encode(person));
+  print(personJsonCodec.encode(personJsonCodec.decode(personJsonCodec.encode(person))));
 }

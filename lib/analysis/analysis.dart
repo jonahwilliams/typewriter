@@ -23,12 +23,22 @@ class ClassDescription {
   String toString() => 'ClassDescription for $type\n$fields';
 }
 
-/// Type information and metadata for a field to be serialized.
-class FieldDescription {
-  final String name;
-  final DartType type;
+abstract class FieldDescription {
+  static const _simpleTypes = const [
+    'List',
+    'bool',
+    'int',
+    'double',
+    'DateTime',
+    'String'
+  ];
 
-  const FieldDescription(this.name, this.type);
+  String get name;
+  DartType get type;
+  int get position;
+
+  const FieldDescription();
+
 
   @override
   int get hashCode => hash2(name, type);
@@ -37,9 +47,18 @@ class FieldDescription {
   bool operator ==(Object other) =>
       other is FieldDescription && other.name == name && other.type == type;
 
-  @override
-  String toString() => 'FieldDescription $name $type';
+  bool get isUserDefined => !_simpleTypes.contains(type.displayName);
 }
+
+class SimpleDescription extends FieldDescription {
+  final position = -1;
+  final String name;
+  final DartType type;
+
+  const SimpleDescription(this.name, this.type);
+}
+
+
 
 /// A way of determining if a class can be serialized.
 abstract class AnalysisStrategy {
@@ -54,27 +73,26 @@ class SimpleStrategy implements AnalysisStrategy {
   const SimpleStrategy();
 
   ClassDescription analyze(ClassElement element) {
-    // TODO: find a better way to know if a class extends or mixes in something
-    if (element.hasReferenceToSuper) {
+    if (element.supertype.displayName != 'Object') {
       throw new Exception('Cannot use ${element.name} because it uses '
           'inheritance or mixins.');
     }
 
-    // TODO: check that there is no default ctr, or default ctr has no params.
-    // if (element?.unnamedConstructor?.parameters?.isEmpty == true) {
-    //   throw new Exception('Cannot use ${element.name} because it has no '
-    //     'default constructor.');
-    // }
+    if (!(element.unnamedConstructor?.isDefaultConstructor ?? true)) {
+       throw new Exception('Cannot use ${element.name} because it has no '
+         'default constructor.');
+    }
 
-    final fields = element.fields
-        .where((field) =>
-            !field.isFinal &&
-            !field.isConst &&
-            !field.isStatic &&
-            field.isPublic)
-        .map((field) {
-      return new FieldDescription(field.name, field.type);
-    }).toList();
+    final fields = <FieldDescription>[];
+    for (final field in element.fields) {
+      if (field.isFinal) {
+        throw new Exception('Cannot use ${element.name} because it has final '
+            'fields');
+      }
+      if (field.isPublic) {
+        fields.add(new SimpleDescription(field.name, field.type));
+      }
+    }
     return new ClassDescription(element.type, fields);
   }
 }

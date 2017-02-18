@@ -15,12 +15,22 @@ class JsonWriter extends Writer {
 
       $name convert(Object raw) {
         final input = raw as Map<String, dynamic>;
-        final output = new $name();
-
-    ''');
-    for (final field in description.fields) {
-      // This is a hack because I haven't figured out a nice interface.
-      buffer.writeln('output.${field.name} = input["${field.name}"];');
+        final output = new $name();''');
+    for (var i = 0; i < description.fields.length; i++) {
+      final field = description.fields[i];
+      if (field.isUserDefined) {
+        buffer.writeln('output.${field.name} = (const ${field.type
+                .displayName}JsonDecoder()).convert(input["${field.name}"]);');
+      } else {
+        switch (field.type.displayName) {
+          case 'DateTime':
+            buffer.writeln('output.${field.name} = '
+                'DateTime.parse(input["${field.name}"]);');
+            break;
+          default:
+            buffer.writeln('output.${field.name} = input["${field.name}"];');
+        }
+      }
     }
     buffer.write('''
         return output;
@@ -35,12 +45,23 @@ class JsonWriter extends Writer {
       const ${name}JsonEncoder();
 
       Object convert($name input) {
-        final output = <String, dynamic>{};
-
-    ''');
-    for (final field in description.fields) {
-      // This is a hack because I haven't figured out a nice interface.
-      buffer.writeln('output["${field.name}"] = input.${field.name};');
+        final output = <String, dynamic>{};''');
+    for (var i = 0; i < description.fields.length; i++) {
+      final field = description.fields[i];
+      if (field.isUserDefined) {
+        buffer.writeln(
+            'output["${field.name}"] = (const ${field.type.displayName}'
+            'JsonEncoder()).convert(input.${field.name});');
+      } else {
+        switch (field.type.displayName) {
+          case 'DateTime':
+            buffer.writeln('output["${field.name}"] = input.${field
+                    .name}.toIso8601String();');
+            break;
+          default:
+            buffer.writeln('output["${field.name}"] = input.${field.name};');
+        }
+      }
     }
     buffer.write('''
         return output;
@@ -48,21 +69,17 @@ class JsonWriter extends Writer {
     }
     ''');
 
-    ///
-    ///
     buffer.writeln('''
-    class ${name}JsonCodec extends Codec<Object, $name> {
-      static const _encoder = const ${name}JsonEncoder();
-      static const _decoder = const ${name}JsonDecoder();
-
-      const ${name}JsonCodec();
+    class _${name}JsonCodec extends Codec<$name, Object> {
+      const _${name}JsonCodec();
 
       @override
-      Converter<String, Object> get encoder => _encoder;
+      Converter<$name, Object> get encoder => const ${name}JsonEncoder();
 
       @override
-      Converter<Object, String> get decoder => _decoder;
+      Converter<Object, $name> get decoder => const ${name}JsonDecoder();
     }
+    final ${name.toLowerCase()}JsonCodec = const _${name}JsonCodec().fuse(jsonCodec);
     ''');
     return buffer.toString();
   }
