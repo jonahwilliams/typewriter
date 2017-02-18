@@ -1,13 +1,4 @@
 # typewriter
-A Jackson-like library for dart serialization.  It's high level goals are,
-
-1. Performance
-
-Use code generation instead of mirrors/meta-programming to create codecs which are as performant as those written by hand.
-
-2. Easy to use
-
-Use sane defaults and helpful errors/documentation.
 
 Given a simple Dart class like this, generate an encoder/decoder class for any
 number of different serialization formats.
@@ -21,17 +12,8 @@ class Person {
 }
 ```
 
-Typewriter would generate a codec, containing code which looks something like this.
+Typewriter generates a codec, containing code which looks something like this.
 
-```dart
-Object convert(Person person) {
-   return {
-     'age': person.age,
-     'birthday': person.birthday.toIso8601String(),
-     'name': person.name,
-   };
-}
-```
 
 
 ## Design
