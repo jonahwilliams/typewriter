@@ -30,7 +30,8 @@ void main() {
           unorderedEquals([
             new SimpleDescription('name', element.getField('name').type),
             new SimpleDescription('age', element.getField('age').type),
-            new SimpleDescription('birthday', element.getField('birthday').type),
+            new SimpleDescription(
+                'birthday', element.getField('birthday').type),
           ]));
     });
 

@@ -1,8 +1,6 @@
 part of typewriter.writer;
 
-
 class YamlWriter extends Writer {
-
   const YamlWriter();
 
   String write(ClassDescription description) {

@@ -1,7 +1,6 @@
 import 'item.dart';
 import 'dog.dart';
 
-
 class Person {
   String name;
   int age;

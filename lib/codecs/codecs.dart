@@ -1,6 +1,5 @@
 library typewriter.codecs;
 
-
 import 'dart:convert';
 
 import 'package:yaml/yaml.dart';

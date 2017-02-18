@@ -6,12 +6,10 @@ import 'package:dart_style/src/dart_formatter.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:typewriter/generators/generator.dart';
 
-
 class CodecBuilder implements Builder {
   final TypewriterGenerator _generator;
 
   const CodecBuilder(this._generator);
-
 
   Future<Null> build(BuildStep step) async {
     final resolver = await step.resolver;
@@ -35,7 +33,8 @@ class CodecBuilder implements Builder {
     final result = contentBuffer.toString();
     final formatter = new DartFormatter();
 
-    await step.writeAsString(_generatedFile(step.inputId),formatter.format(result));
+    await step.writeAsString(
+        _generatedFile(step.inputId), formatter.format(result));
   }
 
   List<AssetId> declareOutputs(AssetId assetId) => [_generatedFile(assetId)];
@@ -55,8 +54,5 @@ class CodecBuilder implements Builder {
     }
   }
 
-  AssetId _generatedFile(AssetId input) =>
-      input.changeExtension('.g.dart');
+  AssetId _generatedFile(AssetId input) => input.changeExtension('.g.dart');
 }
-
-

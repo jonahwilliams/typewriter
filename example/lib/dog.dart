@@ -1,5 +1,3 @@
-
-
 class Dog {
   String name;
   double age;

@@ -39,7 +39,6 @@ abstract class FieldDescription {
 
   const FieldDescription();
 
-
   @override
   int get hashCode => hash2(name, type);
 
@@ -57,8 +56,6 @@ class SimpleDescription extends FieldDescription {
 
   const SimpleDescription(this.name, this.type);
 }
-
-
 
 /// A way of determining if a class can be serialized.
 abstract class AnalysisStrategy {
@@ -79,8 +76,8 @@ class SimpleStrategy implements AnalysisStrategy {
     }
 
     if (!(element.unnamedConstructor?.isDefaultConstructor ?? true)) {
-       throw new Exception('Cannot use ${element.name} because it has no '
-         'default constructor.');
+      throw new Exception('Cannot use ${element.name} because it has no '
+          'default constructor.');
     }
 
     final fields = <FieldDescription>[];
