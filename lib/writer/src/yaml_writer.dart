@@ -3,7 +3,7 @@ part of typewriter.writer;
 class YamlWriter extends Writer {
   const YamlWriter();
 
-  String write(ClassDescription description) {
+  String write(ClassDescription description, AnalysisContext context) {
     final buffer = new StringBuffer();
     final name = description.type.displayName;
 

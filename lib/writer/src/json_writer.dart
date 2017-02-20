@@ -3,8 +3,9 @@ part of typewriter.writer;
 class JsonWriter extends Writer {
   const JsonWriter();
 
-  String write(ClassDescription description) {
+  String write(ClassDescription description, AnalysisContext context) {
     final buffer = new StringBuffer();
+    final typeProvider = context.typeProvider;
     final name = description.type.displayName;
 
     // this format also depends on the type of strategy used, like
@@ -21,15 +22,14 @@ class JsonWriter extends Writer {
       if (field.isUserDefined) {
         buffer.writeln('output.${field.name} = (const ${field.type
                 .displayName}JsonDecoder()).convert(input["${field.name}"]);');
+      } else if (field.type.displayName == 'DateTime') {
+        buffer.writeln('output.${field.name} = '
+            'DateTime.parse(input["${field.name}"]);');
+      } else if (field.type.isAssignableTo(typeProvider.listType)) {
+        final param = (field.type as ParameterizedType).typeParameters.first;
+        // DO NOTHING ARGH;
       } else {
-        switch (field.type.displayName) {
-          case 'DateTime':
-            buffer.writeln('output.${field.name} = '
-                'DateTime.parse(input["${field.name}"]);');
-            break;
-          default:
-            buffer.writeln('output.${field.name} = input["${field.name}"];');
-        }
+        buffer.writeln('output.${field.name} = input["${field.name}"];');
       }
     }
     buffer.write('''

@@ -22,7 +22,6 @@ class CodecBuilder implements Builder {
     contentBuffer.writeln("part of ${library.displayName};");
 
     contentBuffer.writeln('const jsonCodec = const JsonCodec();');
-    contentBuffer.writeln('const xmlCodec = const XmlCodec();');
 
     for (final element in _getClassElements(library)) {
       log.fine('Generating codec for ${element.displayName}');

@@ -3,7 +3,7 @@ part of typewriter.writer;
 class XmlWriter extends Writer {
   const XmlWriter();
 
-  String write(ClassDescription description) {
+  String write(ClassDescription description, AnalysisContext context) {
     final buffer = new StringBuffer();
     final name = description.type.displayName;
 

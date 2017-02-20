@@ -1,5 +1,6 @@
 import 'package:test/test.dart';
 import 'package:typewriter/analysis/analysis.dart';
+import 'package:typewriter/descriptions/descriptions.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/src/generated/type_system.dart';
 import 'package:analyzer/analyzer.dart';
@@ -26,7 +27,7 @@ void main() {
       final element = library.getType('Foo');
 
       expect(
-          strategy.analyze(element).fields,
+          strategy.analyze(element, element.context).fields,
           unorderedEquals([
             new SimpleDescription('name', element.getField('name').type),
             new SimpleDescription('age', element.getField('age').type),
@@ -46,7 +47,7 @@ void main() {
       final library = await resolver.resolveSourceCode(source);
       final element = library.getType('Foo');
 
-      expect(() => strategy.analyze(element), throwsException);
+      expect(() => strategy.analyze(element, element.context), throwsException);
     });
 
     test('does not work on classes with final fields', () async {
@@ -59,7 +60,7 @@ void main() {
       final library = await resolver.resolveSourceCode(source);
       final element = library.getType('Foo');
 
-      expect(() => strategy.analyze(element), throwsException);
+      expect(() => strategy.analyze(element, element.context), throwsException);
     });
 
     // TODO: what is it called when you leave off the ctr?
@@ -75,7 +76,7 @@ void main() {
       final library = await resolver.resolveSourceCode(source);
       final element = library.getType('Bar');
 
-      expect(() => strategy.analyze(element), throwsException);
+      expect(() => strategy.analyze(element, element.context), throwsException);
     });
 
     test('does allow extra alternative constructors', () async {
@@ -89,7 +90,7 @@ void main() {
       final library = await resolver.resolveSourceCode(source);
       final element = library.getType('Fizz');
 
-      expect(strategy.analyze(element).fields,
+      expect(strategy.analyze(element, element.context).fields,
           [new SimpleDescription('foo', element.getField('foo').type)]);
     });
   });

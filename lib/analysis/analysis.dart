@@ -1,67 +1,17 @@
+import '../descriptions/descriptions.dart';
+
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:quiver/core.dart';
 import 'package:quiver/collection.dart';
+import 'package:resolver/src/analyzer.dart';
 
-/// A collection of type information and metadata for a class to be serialized.
-class ClassDescription {
-  final List<FieldDescription> fields;
-  final DartType type;
-
-  const ClassDescription(this.type, this.fields);
-
-  @override
-  int get hashCode => hash2(fields.fold(1327, (acc, x) => hash2(acc, x)), type);
-
-  @override
-  bool operator ==(Object other) =>
-      other is ClassDescription &&
-      other.type == type &&
-      listsEqual(other.fields, fields);
-
-  @override
-  String toString() => 'ClassDescription for $type\n$fields';
-}
-
-abstract class FieldDescription {
-  static const _simpleTypes = const [
-    'List',
-    'bool',
-    'int',
-    'double',
-    'DateTime',
-    'String'
-  ];
-
-  String get name;
-  DartType get type;
-  int get position;
-
-  const FieldDescription();
-
-  @override
-  int get hashCode => hash2(name, type);
-
-  @override
-  bool operator ==(Object other) =>
-      other is FieldDescription && other.name == name && other.type == type;
-
-  bool get isUserDefined => !_simpleTypes.contains(type.displayName);
-}
-
-class SimpleDescription extends FieldDescription {
-  final position = -1;
-  final String name;
-  final DartType type;
-
-  const SimpleDescription(this.name, this.type);
-}
 
 /// A way of determining if a class can be serialized.
 abstract class AnalysisStrategy {
   const AnalysisStrategy();
 
-  ClassDescription analyze(ClassElement element);
+  ClassDescription analyze(ClassElement element, AnalysisContext context);
 }
 
 /// A method of analyzing which only allows classes with default
@@ -69,7 +19,9 @@ abstract class AnalysisStrategy {
 class SimpleStrategy implements AnalysisStrategy {
   const SimpleStrategy();
 
-  ClassDescription analyze(ClassElement element) {
+  ClassDescription analyze(ClassElement element, AnalysisContext context) {
+    final typeProvider = context.typeProvider;
+
     if (element.supertype.displayName != 'Object') {
       throw new Exception('Cannot use ${element.name} because it uses '
           'inheritance or mixins.');
@@ -81,15 +33,28 @@ class SimpleStrategy implements AnalysisStrategy {
     }
 
     final fields = <FieldDescription>[];
-    for (final field in element.fields) {
+    loop: for (final field in element.fields) {
       if (field.isFinal) {
         throw new Exception('Cannot use ${element.name} because it has final '
             'fields');
       }
       if (field.isPublic) {
+        String key;
+        int position;
+        // TODO: find a better way to do this.
+        for (final annotation in field.metadata) {
+          final value = annotation?.constantValue ?? annotation.computeConstantValue();
+          if (value.type.displayName == 'ignore') {
+            continue loop;
+          }
+          if (value.type.displayName == 'JsonKey') {
+            key = value.getField('key').toStringValue();
+            position = value.getField('position').toIntValue();
+          }
+        }
         fields.add(new SimpleDescription(field.name, field.type));
       }
     }
-    return new ClassDescription(element.type, fields);
+    return new SimpleClassDescription(element.type, fields);
   }
 }
