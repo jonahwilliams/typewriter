@@ -6,8 +6,4 @@
 /// More dartdocs go here.
 library typewriter;
 
-export 'analysis/analysis.dart';
-export 'annotations/annotations.dart';
-export 'generators/generator.dart';
-
-// TODO: Export any libraries intended for clients of this package.
+export 'package:typewriter/annotations/annotations.dart';

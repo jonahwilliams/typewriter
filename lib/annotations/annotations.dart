@@ -5,10 +5,12 @@ import 'package:meta/meta.dart';
 part 'src/json_annotations.dart';
 part 'src/xml_annotations.dart';
 
-
 /// Basic information that can be provided on a field or constructor argument.
 abstract class DataAnnotation {
+  ///
   String get key;
+
+  ///
   int get position;
 }
 
@@ -23,5 +25,6 @@ abstract class EncodeAnnotation {}
 
 /// Ignores the field when generating codecs.
 class Ignore {
+  ///
   const Ignore();
 }

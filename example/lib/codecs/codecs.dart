@@ -1,7 +1,6 @@
 library typewriter.example.codecs;
 
-import '../dog.dart';
-import '../item.dart';
+import 'package:typewriter/typewriter.dart';
 import '../person.dart';
 
 import 'dart:convert';

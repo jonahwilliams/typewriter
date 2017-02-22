@@ -6,7 +6,26 @@ class JsonKey implements DataAnnotation {
   final String key;
 
   @override
-  int get position => -1;
+  final int position = -1;
 
+  ///
   const JsonKey(this.key);
+}
+
+///
+class Json implements ClassAnnotation {
+  ///
+  const Json();
+}
+
+///
+class JsonEncoder implements EncodeAnnotation {
+  ///
+  const JsonEncoder();
+}
+
+///
+class JsonDecoder implements DecodeAnnotation {
+  ///
+  const JsonDecoder();
 }
