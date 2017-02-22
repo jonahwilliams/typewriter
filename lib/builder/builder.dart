@@ -11,10 +11,12 @@ import 'package:typewriter/src/system_type_provider.dart';
 
 AssetId _generatedFile(AssetId input) => input.changeExtension('.g.dart');
 
+///
 class CodecAnalyzerStep implements Builder {
   MetadataRegistry _registry;
   SystemTypeProvider _typeProvider;
 
+  ///
   CodecAnalyzerStep();
 
   @override
@@ -105,7 +107,7 @@ class CodecAnalyzerStep implements Builder {
       return;
     }
 
-    if (!(element.unnamedConstructor?.isDefaultConstructor ?? true)) {
+    if (element.unnamedConstructor?.isDefaultConstructor == null) {
       throw new Exception('Cannot use ${element.name} because it has no '
           'default constructor.');
     }
