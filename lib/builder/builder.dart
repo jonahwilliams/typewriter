@@ -5,15 +5,19 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:dart_style/src/dart_formatter.dart';
+import 'package:typewriter/src/codec_builder.dart';
+import 'package:typewriter/src/metadata.dart';
+import 'package:typewriter/src/system_type_provider.dart';
 
-import '../analysis/analysis.dart';
+AssetId _generatedFile(AssetId input) => input.changeExtension('.g.dart');
 
 class CodecAnalyzerStep implements Builder {
-  final MetadataRegistry _registry;
+  MetadataRegistry _registry;
   SystemTypeProvider _typeProvider;
 
-  CodecAnalyzerStep(this._registry);
+  CodecAnalyzerStep();
 
+  @override
   Future<Null> build(BuildStep step) async {
     final resolver = await step.resolver;
     if (!resolver.isLibrary(step.inputId)) {
@@ -21,10 +25,10 @@ class CodecAnalyzerStep implements Builder {
     }
     final coreLib = resolver.getLibraryByName('dart.core');
     final typewriterLib = resolver.getLibraryByName('typewriter.annotations');
-    _typeProvider = new SystemTypeProvider(typewriterLib);
+    _typeProvider = new SystemTypeProviderImpl(typewriterLib);
 
     final library = resolver.getLibrary(step.inputId);
-    _registry.initialize(library.context, coreLib);
+    _registry = new MetadataRegistryImpl(library.context, coreLib);
     log.config('Initializing metadata map');
 
     for (final element in _getClassElements(library)) {
@@ -33,17 +37,14 @@ class CodecAnalyzerStep implements Builder {
       } on Exception catch (err) {
         log.severe(err);
       }
-      log.config('${_registry.metadata}');
     }
 
     final contentBuffer = new StringBuffer();
     contentBuffer.writeln("part of ${library.displayName};");
     contentBuffer.writeln('const jsonCodec = const JsonCodec();');
 
-    for (final metadata in _registry.metadata.values) {
-      if (metadata is CompositeTypeMetadata) {
-        contentBuffer.write(_generate(metadata.element));
-      }
+    for (final metadata in _registry.compositeTypes) {
+      contentBuffer.write(_generate(metadata.element));
     }
 
     final result = contentBuffer.toString();
@@ -53,13 +54,10 @@ class CodecAnalyzerStep implements Builder {
         _generatedFile(step.inputId), formatter.format(result));
   }
 
+  @override
   List<AssetId> declareOutputs(AssetId assetId) => [_generatedFile(assetId)];
 
   void _analyze(ClassElement element) {
-    if (_registry.metadata.containsKey(element.type)) {
-      throw new Exception('${element.displayName} has already been defined');
-    }
-
     if (element.supertype.displayName != 'Object') {
       throw new Exception('Cannot use ${element.name} because it uses '
           'inheritance or mixins.');
@@ -96,12 +94,14 @@ class CodecAnalyzerStep implements Builder {
             'of type Object');
       }
 
-      _registry.metadata[element.type] = new ScalarTypeMetadata(
+      _registry.addType(
           element.type,
-          (x) => '$x.${encoder.name}()',
-          (x) => 'new ${element.name}'
-              '${decoder.name != "" ? "." : ""}'
-              '${decoder.name ?? ""}($x)');
+          new ScalarTypeMetadata(
+              element.type,
+              (x) => '$x.${encoder.name}()',
+              (x) => 'new ${element.name}'
+                  '${decoder.name != "" ? "." : ""}'
+                  '${decoder.name ?? ""}($x)'));
       return;
     }
 
@@ -109,8 +109,8 @@ class CodecAnalyzerStep implements Builder {
       throw new Exception('Cannot use ${element.name} because it has no '
           'default constructor.');
     }
-    _registry.metadata[element.type] =
-        new CompositeTypeMetadata(element.type, element);
+    _registry.addType(
+        element.type, new CompositeTypeMetadata(element.type, element));
 
     loop:
     for (final field in element.fields) {
@@ -125,9 +125,6 @@ class CodecAnalyzerStep implements Builder {
             continue loop;
           }
         }
-      }
-      if (_registry.metadata[field.type] == null) {
-        _registry.missing.add(field.type);
       }
     }
   }
@@ -171,5 +168,3 @@ class CodecAnalyzerStep implements Builder {
             (an) => an.constantValue.type.isAssignableTo(_typeProvider.json)));
   }
 }
-
-AssetId _generatedFile(AssetId input) => input.changeExtension('.g.dart');
