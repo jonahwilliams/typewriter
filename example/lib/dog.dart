@@ -1,5 +1,5 @@
 class Dog {
-  String name;
+  List<String> names;
   double age;
   DateTime birthday;
 }
