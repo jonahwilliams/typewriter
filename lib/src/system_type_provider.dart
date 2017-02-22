@@ -1,40 +1,26 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 
-///
-abstract class SystemTypeProvider {
-  ///
-  DartType get ignore;
-
-  ///
-  DartType get json;
-
-  ///
-  DartType get jsonDecoder;
-
-  ///
-  DartType get jsonEncoder;
-
-  ///
-  DartType get jsonKey;
-}
-
-///
-class SystemTypeProviderImpl implements SystemTypeProvider {
-  @override
+/// Provides [DartType]s for the annotation elements.
+class SystemTypeProvider {
+  /// An annotation which tells analysis to ignore the field.
   final DartType ignore;
-  @override
+
+  /// An annotation which provides a different key name.
   final DartType jsonKey;
-  @override
+  
+  /// An annotation which tells analysis to use the json builder.
   final DartType json;
-  @override
+
+  /// An annotation which switchs to a custom encoder/decoder strategy.
   final DartType jsonEncoder;
-  @override
+
+  /// Same as above, must be paired to work correctly.
   final DartType jsonDecoder;
 
-  ///
-  factory SystemTypeProviderImpl(LibraryElement library) {
-    return new SystemTypeProviderImpl._(
+  /// Builds a new [SystemTypeProvider] from the package:typewriter annotation library element.
+  factory SystemTypeProvider(LibraryElement library) {
+    return new SystemTypeProvider._(
         library.getType('Ignore').type,
         library.getType('JsonKey').type,
         library.getType('Json').type,
@@ -42,6 +28,6 @@ class SystemTypeProviderImpl implements SystemTypeProvider {
         library.getType('JsonDecoder').type);
   }
 
-  SystemTypeProviderImpl._(
+  SystemTypeProvider._(
       this.ignore, this.jsonKey, this.json, this.jsonEncoder, this.jsonDecoder);
 }

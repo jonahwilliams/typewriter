@@ -1,6 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:resolver/src/analyzer.dart';
 
 ///
 typedef String Writer(String input);
@@ -18,29 +17,14 @@ class CompositeTypeMetadata implements TypeMetadata {
   String get displayName => _type.displayName;
 }
 
-///
-abstract class MetadataRegistry {
-  ///
-  Iterable<CompositeTypeMetadata> get compositeTypes;
 
-  ///
-  Iterable<ScalarTypeMetadata> get scalarTypes;
-
-  ///
-  void addType(DartType type, TypeMetadata metadata);
-
-  ///
-  TypeMetadata getType(DartType type);
-}
-
-///
-class MetadataRegistryImpl implements MetadataRegistry {
+/// A way of tracking additional information about types and codecs to be generated.
+class MetadataRegistry {
   final Map<DartType, TypeMetadata> _metadata;
 
-  ///
-  factory MetadataRegistryImpl(
-      AnalysisContext context, LibraryElement coreLibrary) {
-    final provider = context.typeProvider;
+  /// Builds a [MetadataRegistry] from a resolve dart:core library element.
+  factory MetadataRegistry(LibraryElement coreLibrary) {
+    final provider = coreLibrary.context.typeProvider;
     final dateTimeType = coreLibrary.getType('DateTime').type;
     final regexType = coreLibrary.getType('RegExp').type;
     final symbolType = coreLibrary.getType('Symbol').type;
@@ -62,25 +46,25 @@ class MetadataRegistryImpl implements MetadataRegistry {
       symbolType: new ScalarTypeMetadata(
           symbolType, (x) => '$x.toString()', (x) => 'new Symbol($x)')
     };
-    return new MetadataRegistryImpl._(metadata);
+    return new MetadataRegistry._(metadata);
   }
 
-  MetadataRegistryImpl._(this._metadata);
+  MetadataRegistry._(this._metadata);
 
-  @override
+  /// Returns all of the [CompositeTypeMetadata] in the registry.
   Iterable<CompositeTypeMetadata> get compositeTypes =>
       _metadata.values.where((data) => data is CompositeTypeMetadata);
-
-  @override
+  
+  /// Returns all of the [ScalarTypeMetadata] in the registry.
   Iterable<ScalarTypeMetadata> get scalarTypes =>
       _metadata.values.where((data) => data is ScalarTypeMetadata);
-
-  @override
+  
+  /// Adds a [type] with [metadata] to the registry.
   void addType(DartType type, TypeMetadata metadata) {
     _metadata[type] = metadata;
   }
 
-  @override
+  /// retrieves the [TypeMetadata] associated with [type], or null.
   TypeMetadata getType(DartType type) => _metadata[type];
 
   static String _identity(String input) => input;

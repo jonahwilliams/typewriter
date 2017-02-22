@@ -12,12 +12,12 @@ import 'package:typewriter/src/system_type_provider.dart';
 AssetId _generatedFile(AssetId input) => input.changeExtension('.g.dart');
 
 ///
-class CodecAnalyzerStep implements Builder {
+class JsonCodecBuilder implements Builder {
   MetadataRegistry _registry;
   SystemTypeProvider _typeProvider;
 
   ///
-  CodecAnalyzerStep();
+  JsonCodecBuilder();
 
   @override
   Future<Null> build(BuildStep step) async {
@@ -27,10 +27,10 @@ class CodecAnalyzerStep implements Builder {
     }
     final coreLib = resolver.getLibraryByName('dart.core');
     final typewriterLib = resolver.getLibraryByName('typewriter.annotations');
-    _typeProvider = new SystemTypeProviderImpl(typewriterLib);
+    _typeProvider = new SystemTypeProvider(typewriterLib);
 
     final library = resolver.getLibrary(step.inputId);
-    _registry = new MetadataRegistryImpl(library.context, coreLib);
+    _registry = new MetadataRegistry(coreLib);
     log.config('Initializing metadata map');
 
     for (final element in _getClassElements(library)) {
@@ -114,26 +114,17 @@ class CodecAnalyzerStep implements Builder {
     _registry.addType(
         element.type, new CompositeTypeMetadata(element.type, element));
 
-    loop:
-    for (final field in element.fields) {
-      if (field.isFinal) {
-        throw new Exception('Cannot use ${element.name} because it has final '
-            'fields');
-      }
-      if (field.isPublic) {
-        for (final annotation in field.metadata) {
-          final value = annotation.constantValue;
-          if (value.type.isAssignableTo(_typeProvider.ignore)) {
-            continue loop;
-          }
-        }
-      }
+    if (element.fields.any(
+      (field) => field.isFinal && !field.metadata
+       .any((an) => an.constantValue.type.isAssignableTo(_typeProvider.ignore)))) {
+        throw new Exception('');
     }
   }
 
   String _generate(ClassElement element) {
     final builder = new CodecBuilder.Json(_registry, element.type);
 
+    // TODO: refactor this so that analyzer saves a List of fields for each class.
     loop:
     for (final field in element.fields.where((x) => x.isPublic)) {
       String key = field.name;
