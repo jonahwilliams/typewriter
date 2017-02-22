@@ -1,5 +1,4 @@
 import 'package:analyzer/dart/element/type.dart';
-
 import 'metadata.dart';
 
 ///
