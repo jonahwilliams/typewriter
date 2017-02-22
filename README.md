@@ -1,23 +1,42 @@
 # typewriter
 
 Given a simple Dart class like this, generate an encoder/decoder class for any
-number of different serialization formats.
+number of different serialization formats.  Not currently stable.
 
 
 ```dart
+@Json()
 class Person {
   int age;
-  DateTime birthday;
+  @JsonKey('birth_day')
+  DateTime birthDay;
   String name;
 }
+
+@Json()
+class Dog {  
+  @JsonDecoder()
+  factory Dog(Object input) {
+    return new Dog._();
+  }
+  
+  Dog._();
+  
+  @JsonEncoder()
+  Object encode() {
+    return {'bark': 'woof'};
+  }
+}
+
+@Xml()
+class ApiResponse {
+  @XmlElement('name-list', position: 0)
+  List<String> names;
+  
+  @XmlAttribute('name-length', element: 'name-list')
+  int lenth;
+}
 ```
-
-Typewriter generates a codec, containing code which looks something like this.
-
-
-
-## Design
-The following is in progress work on the overall design of the library.
 
 ### Annotation/Configuration
 Annotations should be used to provide extra information to the library and
@@ -70,33 +89,10 @@ be initialized.
 Support for Inheritance and Generics will be considered If it makes sense at some point in the future.
 
 
-### Writers
-using the class description from analysis, generate a class which can encode and decode.
-
-A Codec is generated for each target language, then that codec is fused with the language specific
-serializer to produce a codec capable of converting between a type and it's xml/json string representation.
-```
-  [Class Person] --> [Codec: Person -> Xml]  + [Codec Xml -> String]
-                 --> [Codec: Person -> Json] + [Codec Json -> String]
-
-```
-
-
-### Build Process (In progress)
-Because these types can be nested, we need to determine what types are
-available before we can start generating codecs.
-
-1. Determine the full list of classes which need to have codecs.  Ensure that
-there are no definitions missing and everything is available (fail fast).
-
-Something something make sure types are resolved and stuff.
-
-2. Begin generating codecs in the same directory.  Maybe use code builder instead
-of strings.
+### CodecBuilders
+using the class description from analysis, generate a class which can encode and decode the
+ Object from a String.  Currently this is done by converting it into an already serializable format and 
+ then using other libraries.  This may change in the future.
 
 
 ## Features and bugs
-
-Please file feature requests and bugs at the [issue tracker][tracker].
-
-[tracker]: http://example.com/issues/replaceme
