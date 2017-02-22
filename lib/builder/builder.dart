@@ -10,7 +10,7 @@ import '../analysis/analysis.dart';
 
 class CodecAnalyzerStep implements Builder {
   final MetadataRegistry _registry;
-  TypewriterTypeProvider _typeProvider;
+  SystemTypeProvider _typeProvider;
 
   CodecAnalyzerStep(this._registry);
 
@@ -21,8 +21,7 @@ class CodecAnalyzerStep implements Builder {
     }
     final coreLib = resolver.getLibraryByName('dart.core');
     final typewriterLib = resolver.getLibraryByName('typewriter.annotations');
-    print(typewriterLib);
-    _typeProvider = new TypewriterTypeProvider(typewriterLib);
+    _typeProvider = new SystemTypeProvider(typewriterLib);
 
     final library = resolver.getLibrary(step.inputId);
     _registry.initialize(library.context, coreLib);
@@ -65,6 +64,46 @@ class CodecAnalyzerStep implements Builder {
       throw new Exception('Cannot use ${element.name} because it uses '
           'inheritance or mixins.');
     }
+    // Encoder/Decoder strategy adds the type as a Scalar instead of creating
+    // a Codec.
+    final encoder = element.methods.firstWhere(
+        (el) => el.metadata.any((ann) =>
+            ann.constantValue.type.isAssignableTo(_typeProvider.jsonEncoder)),
+        orElse: () => null);
+    if (encoder != null) {
+      final decoder = element.constructors.firstWhere(
+          (ctr) =>
+              ctr.isFactory &&
+              ctr.metadata.any((ann) => ann.constantValue.type
+                  .isAssignableTo(_typeProvider.jsonDecoder)),
+          orElse: () => null);
+      if (decoder == null) {
+        throw new Exception('Cannot define a JsonEncode annotation without '
+            'a corresponding JsonDecode annotation');
+      }
+      // Oh yeah type checking.
+      if (encoder.parameters.length != 0) {
+        throw new Exception('JsonEncode method must take zero arguments.');
+      }
+      if (!encoder.returnType
+          .isAssignableTo(element.context.typeProvider.objectType)) {
+        throw new Exception('JsonEncode method must return an Object');
+      }
+      if (decoder.parameters.length != 1 ||
+          !decoder.parameters.first.type
+              .isAssignableTo(element.context.typeProvider.objectType)) {
+        throw new Exception('JsonDecode factory must take a single argument '
+            'of type Object');
+      }
+
+      _registry.metadata[element.type] = new ScalarTypeMetadata(
+          element.type,
+          (x) => '$x.${encoder.name}()',
+          (x) => 'new ${element.name}'
+              '${decoder.name != "" ? "." : ""}'
+              '${decoder.name ?? ""}($x)');
+      return;
+    }
 
     if (!(element.unnamedConstructor?.isDefaultConstructor ?? true)) {
       throw new Exception('Cannot use ${element.name} because it has no '
@@ -82,7 +121,7 @@ class CodecAnalyzerStep implements Builder {
       if (field.isPublic) {
         for (final annotation in field.metadata) {
           final value = annotation.constantValue;
-          if (value.type.isAssignableTo(_typeProvider.ignoreType)) {
+          if (value.type.isAssignableTo(_typeProvider.ignore)) {
             continue loop;
           }
         }
@@ -102,10 +141,10 @@ class CodecAnalyzerStep implements Builder {
       int position = -1;
       for (final annotation in field.metadata) {
         final value = annotation.constantValue;
-        if (value.type.isAssignableTo(_typeProvider.ignoreType)) {
+        if (value.type.isAssignableTo(_typeProvider.ignore)) {
           continue loop;
         }
-        if (value.type.isAssignableTo(_typeProvider.jsonKeyType)) {
+        if (value.type.isAssignableTo(_typeProvider.jsonKey)) {
           key = annotation.constantValue.getField('key').toStringValue();
           position = annotation.constantValue.getField('position').toIntValue();
         }
@@ -127,7 +166,9 @@ class CodecAnalyzerStep implements Builder {
         .where((lib) => !lib.isDartCore && !lib.isInSdk)
         .expand((el) => el.units.expand((unit) => unit.unit.declarations))
         .where((dec) => dec is ClassDeclaration)
-        .map((dec) => (dec as ClassDeclaration).element);
+        .map((dec) => (dec as ClassDeclaration).element)
+        .where((el) => el.metadata.any(
+            (an) => an.constantValue.type.isAssignableTo(_typeProvider.json)));
   }
 }
 

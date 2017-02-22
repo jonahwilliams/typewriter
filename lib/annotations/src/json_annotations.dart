@@ -10,3 +10,15 @@ class JsonKey implements DataAnnotation {
 
   const JsonKey(this.key);
 }
+
+class Json implements ClassAnnotation {
+  const Json();
+}
+
+class JsonEncoder implements EncodeAnnotation {
+  const JsonEncoder();
+}
+
+class JsonDecoder implements DecodeAnnotation {
+  const JsonDecoder();
+}

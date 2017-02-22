@@ -24,21 +24,24 @@ class ScalarTypeMetadata implements TypeMetadata {
   bool get isScalar => true;
 }
 
-class TypewriterTypeProvider {
-  final DartType _ignoreType;
-  final DartType _jsonKeyType;
+class SystemTypeProvider {
+  final DartType ignore;
+  final DartType jsonKey;
+  final DartType json;
+  final DartType jsonEncoder;
+  final DartType jsonDecoder;
 
-  factory TypewriterTypeProvider(LibraryElement library) {
-    final jsonKeyType = library.getType('JsonKey').type;
-    final ignoreType = library.getType('Ignore').type;
-    return new TypewriterTypeProvider._(ignoreType, jsonKeyType);
+  factory SystemTypeProvider(LibraryElement library) {
+    return new SystemTypeProvider._(
+        library.getType('Ignore').type,
+        library.getType('JsonKey').type,
+        library.getType('Json').type,
+        library.getType('JsonEncoder').type,
+        library.getType('JsonDecoder').type);
   }
 
-  TypewriterTypeProvider._(this._ignoreType, this._jsonKeyType);
-
-  DartType get ignoreType => _ignoreType;
-
-  DartType get jsonKeyType => _jsonKeyType;
+  SystemTypeProvider._(
+      this.ignore, this.jsonKey, this.json, this.jsonEncoder, this.jsonDecoder);
 }
 
 class CompositeTypeMetadata implements TypeMetadata {

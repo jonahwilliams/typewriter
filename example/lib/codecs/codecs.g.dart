@@ -57,6 +57,7 @@ class ItemDecoder extends Converter<Object, Item> {
     output.name = input["name"];
     output.id = input["id"];
     output.description = input["description"];
+    output.why = new RegExp(input["why"]);
     return output;
   }
 }
@@ -70,6 +71,7 @@ class ItemEncoder extends Converter<Item, Object> {
     output["name"] = input.name;
     output["id"] = input.id;
     output["description"] = input.description;
+    output["why"] = input.why.pattern;
     return output;
   }
 }
@@ -94,6 +96,7 @@ class DogDecoder extends Converter<Object, Dog> {
     output.names = input["names"].map((x) => x).toList();
     output.age = input["age"];
     output.birthday = DateTime.parse(input["birthday"]);
+    output.myFoo = new Foo(input["myFoo"]);
     return output;
   }
 }
@@ -107,6 +110,7 @@ class DogEncoder extends Converter<Dog, Object> {
     output["names"] = input.names.map((x) => x).toList();
     output["age"] = input.age;
     output["birthday"] = input.birthday.toIso8601String();
+    output["myFoo"] = input.myFoo.encode();
     return output;
   }
 }
