@@ -1,6 +1,13 @@
 # Typewriter
 
-<b>Typewritter</b> is a Dart library for generating [codecs](https://www.dartlang.org/articles/libraries/converters-and-codecs), encoder/decoder pairs for serialization/deserialization.  This library is currently under active development and is not stable enough for non-experimental use.
+<b>Typewritter</b> is a Dart library for generating [codecs](https://www.dartlang.org/articles/libraries/converters-and-codecs), encoder/decoder pairs for serialization.  Serialization code is repetitive and time consuming to write.  Instead of using reflection/mirrors, Typewriter enables developers to generate configurable codecs automatically from Dart source code.
+
+The currently supported target languages are
+* JSON
+* XML (partial)
+* Yaml (planned) 
+
+This library is currently under active development and is not stable enough for non-experimental use.
 
 ## Example Usage
 
