@@ -60,6 +60,7 @@ class Dog {
   }
 }
 ```
+Checkout examples/.. for some examples of the generated code.
 
 ### Annotation/Configuration
 Annotations should be used to provide extra information to the library and
