@@ -2,7 +2,7 @@
 
 <b>Typewritter</b> is a Dart library for generating [codecs](https://www.dartlang.org/articles/libraries/converters-and-codecs), encoder/decoder pairs for serialization.  Serialization code is repetitive and time consuming to write.  Instead of using reflection/mirrors, Typewriter enables developers to generate configurable codecs automatically from Dart source code.
 
-The currently supported target languages are
+The supported target languages are
 * JSON
 * XML (partial)
 * Yaml (planned) 
@@ -10,8 +10,8 @@ The currently supported target languages are
 This library is currently under active development and is not stable enough for non-experimental use.
 
 ## Example Usage
+Typewriter annotations configure the behavior of the generated codecs.  For example, the following Class uses a `JsonKey` annotation, which changes the name of the field on the resulting JSON.
 
-Anootations allow lite configuration of the serialized classes.
 ```dart
 @Json()
 class Person {
@@ -19,14 +19,21 @@ class Person {
   @JsonKey('birth_day')
   DateTime birthDay;
   String name;
+  Cat myCat;
+}
+
+@Json()
+class Cat {
+  String name;
 }
 ```
-Prodcuces the resulting JSON.
+An instance of this class serialized to JSON would look something like the following.
+
 ```json
-{ "age": 25, "birth_day": "some-long-iso-string", "name": "Jonah"}
+{ "age": 25, "birth_day": "some-long-iso-string", "name": "Jonah", "myCat": {"name": "Mike Hat"}}
 ```
 
-And for XML,
+Xml annotations support configuring the names of elements and child elements with `XmlElement`.  The annotation `XmlAttribute` allows developers to place annotations on any of the elements in the class.
 
 ```dart
 @Xml('FooBar')
@@ -38,7 +45,7 @@ class ApiResponse {
   int lenth;
 }
 ```
-
+The following is an instance of `ApiResponse` serialized to XML.  Typewriter also handles the xml header.
 ```xml
 <?xml version="1.0"?>
 <FooBar>
@@ -50,10 +57,10 @@ class ApiResponse {
 </FooBar>
 ```
 
-You can also specify custom encoders/decoders for classes.
+In case a developer needs to implement specific serialization logic, Typewriter allows specification of `Encoder` and `Decoder` annotations.
 
 ```dart
-@Json()
+@Json(customEncoder: true)
 class Dog {  
   @JsonDecoder()
   factory Dog(Object input) {
@@ -68,30 +75,5 @@ class Dog {
   }
 }
 ```
+
 Checkout examples/.. for some examples of the generated code.
-
-### Annotation/Configuration
-Annotations should be used to provide extra information to the library and
-provide a limited way of configuration.  These annotations will be added as configuration needs are discovered.
-
-### Analysis
-Use the analyzer to inspect the fields, constructors, types of a class and produce a description of the
-necessary codec logic.
-
-For now it only accepts classes with a no argument default constructor, all public fields, et cetera.
-This is the easiest to implement, but leaves out immutable classes and initialization logic.
-
-In later versions, we can handle the above, but also allow an annotated constructor and final fields.
-Using some heuristic to match a constructor argument with a final field to assure that everything can
-be initialized.
-
-Support for Inheritance and Generics will be considered If it makes sense at some point in the future.
-
-
-### CodecBuilders
-using the class description from analysis, generate a class which can encode and decode the
- Object from a String.  Currently this is done by converting it into an already serializable format and 
- then using other libraries.  This may change in the future.
-
-
-## Features and bugs
