@@ -58,6 +58,7 @@ class ItemDecoder extends Converter<Object, Item> {
     output.id = input["id"];
     output.description = input["description"];
     output.why = new RegExp(input["why"]);
+    output.foo = new Foo(input["foo"]);
     return output;
   }
 }
@@ -72,6 +73,7 @@ class ItemEncoder extends Converter<Item, Object> {
     output["id"] = input.id;
     output["description"] = input.description;
     output["why"] = input.why.pattern;
+    output["foo"] = input.foo.encode();
     return output;
   }
 }

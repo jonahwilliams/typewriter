@@ -3,15 +3,16 @@ part of typewriter.analysis;
 /// Performs an analysis where the source class only contains public fields.
 class JsonAnalysisSimple implements Analysis {
   final SystemTypeProvider _typeProvider;
+  final MetadataRegistry _registry;
 
   /// Creates a simple analysis instance.
-  JsonAnalysisSimple(this._typeProvider);
+  JsonAnalysisSimple(this._typeProvider, this._registry);
 
   @override
   final List<Exception> errors = <Exception>[];
 
   @override
-  void analyze(MetadataRegistry registry, ClassElement element) {
+  void analyze(ClassElement element) {
     // May not use inheritance
     if (!element.supertype.isObject) {
       errors.add(new ClassUsingExtendsKeywordException(element.displayName));
@@ -38,7 +39,7 @@ class JsonAnalysisSimple implements Analysis {
       fields.add(field);
     }
 
-    registry.addType(
+    _registry.addType(
         element.type, new CompositeTypeMetadata(element.type, element, fields));
   }
 }
@@ -47,15 +48,16 @@ class JsonAnalysisSimple implements Analysis {
 /// decoders.
 class JsonAnalysisCustom implements Analysis {
   final SystemTypeProvider _typeProvider;
+  final MetadataRegistry _registry;
 
   /// Creates a simple analysis instance.
-  JsonAnalysisCustom(this._typeProvider);
+  JsonAnalysisCustom(this._typeProvider, this._registry);
 
   @override
   final List<Exception> errors = <Exception>[];
 
   @override
-  void analyze(MetadataRegistry registry, ClassElement element) {
+  void analyze(ClassElement element) {
     final encoder = element.methods.firstWhere(
         (el) => el.metadata.any((ann) =>
             ann.constantValue.type.isAssignableTo(_typeProvider.jsonEncoder)),
@@ -88,7 +90,7 @@ class JsonAnalysisCustom implements Analysis {
                 'of type Object'));
       }
 
-      registry.addType(
+      _registry.addType(
           element.type,
           new ScalarTypeMetadata(
               element.type,

@@ -1,6 +1,5 @@
 library typewriter.annotations;
 
-import 'package:meta/meta.dart';
 
 part 'src/json_annotations.dart';
 part 'src/xml_annotations.dart';

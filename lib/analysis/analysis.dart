@@ -15,7 +15,7 @@ part 'src/json_analysis.dart';
 abstract class Analysis {
 
   /// Analyzes the [ClassElement] to determine if.
-  void analyze(MetadataRegistry registry, ClassElement element);
+  void analyze(ClassElement element);
 
   /// Returns the errors generated during class analysis.
   List<Exception> get errors;
