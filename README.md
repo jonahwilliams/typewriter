@@ -3,7 +3,7 @@
 Given a simple Dart class like this, generate an encoder/decoder class for any
 number of different serialization formats.  Not currently stable.
 
-
+Anootations allow lite configuration of the serialized classes.
 ```dart
 @Json()
 class Person {
@@ -13,9 +13,12 @@ class Person {
   String name;
 }
 ```
+Prodcuces the resulting JSON.
 ```json
 { "age": 25, "birth_day": "some-long-iso-string", "name": "Jonah"}
 ```
+
+And for XML,
 
 ```dart
 @Xml('FooBar')
