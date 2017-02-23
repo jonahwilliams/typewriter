@@ -12,7 +12,36 @@ class Person {
   DateTime birthDay;
   String name;
 }
+```
+```json
+{ "age": 25, "birth_day": "some-long-iso-string", "name": "Jonah"}
+```
 
+```dart
+@Xml('FooBar')
+class ApiResponse {
+  @XmlElement('name-list', 'name')
+  List<String> names;
+  
+  @XmlAttribute('name-length', element: 'name-list')
+  int lenth;
+}
+```
+
+```xml
+<?xml version="1.0"?>
+<FooBar>
+  <name-list length="3">
+    <name>Peter Parker</name>
+    <name>Bruce Wayne</name>
+    <name>Snoop Dogg</name>
+  </name-list>
+</FooBar>
+```
+
+You can also specify custom encoders/decoders for classes.
+
+```dart
 @Json()
 class Dog {  
   @JsonDecoder()
@@ -27,53 +56,11 @@ class Dog {
     return {'bark': 'woof'};
   }
 }
-
-@Xml()
-class ApiResponse {
-  @XmlElement('name-list', position: 0)
-  List<String> names;
-  
-  @XmlAttribute('name-length', element: 'name-list')
-  int lenth;
-}
 ```
 
 ### Annotation/Configuration
 Annotations should be used to provide extra information to the library and
-provide a limited way of configuration.
-
-for example, renaming a property in a JSON map.
-```dart
-class Foo {
-  @Field(key: 'foo_bar')
-  String fooBar;
-}
-```
-
-```json
-{ "foo_bar": "My foo's"}
-```
-
-Or making a field into an attribute on an Xml node
-
-```dart
-class Bar {
-  String language;
-
-  @Attribute()
-  int id;
-}
-```
-
-```xml
-<?xml version="1.0"?>
-<Bar id="23">
-  <language>English</language>
-</Bar>
-```
-
-
-These annotations will be added as configuration needs are discovered.
+provide a limited way of configuration.  These annotations will be added as configuration needs are discovered.
 
 ### Analysis
 Use the analyzer to inspect the fields, constructors, types of a class and produce a description of the
