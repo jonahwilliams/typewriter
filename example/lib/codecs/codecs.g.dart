@@ -96,7 +96,6 @@ class DogDecoder extends Converter<Object, Dog> {
     output.names = input["names"].map((x) => x).toList();
     output.age = input["age"];
     output.birthday = DateTime.parse(input["birthday"]);
-    output.myFoo = new Foo(input["myFoo"]);
     return output;
   }
 }
@@ -110,7 +109,6 @@ class DogEncoder extends Converter<Dog, Object> {
     output["names"] = input.names.map((x) => x).toList();
     output["age"] = input.age;
     output["birthday"] = input.birthday.toIso8601String();
-    output["myFoo"] = input.myFoo.encode();
     return output;
   }
 }

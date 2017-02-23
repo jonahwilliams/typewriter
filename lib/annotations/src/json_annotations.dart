@@ -14,8 +14,11 @@ class JsonKey implements DataAnnotation {
 
 ///
 class Json implements ClassAnnotation {
+  /// TODO: think of better name
+  final bool useCustomCodec;
+
   ///
-  const Json();
+  const Json({this.useCustomCodec = false});
 }
 
 ///

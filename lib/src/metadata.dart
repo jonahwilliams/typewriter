@@ -8,10 +8,11 @@ typedef String Writer(String input);
 class CompositeTypeMetadata implements TypeMetadata {
   ///
   final ClassElement element;
+  final List<FieldElement> fields;
   final DartType _type;
 
   ///
-  const CompositeTypeMetadata(this._type, this.element);
+  const CompositeTypeMetadata(this._type, this.element, this.fields);
 
   @override
   String get displayName => _type.displayName;

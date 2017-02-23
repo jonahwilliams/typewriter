@@ -5,6 +5,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:dart_style/src/dart_formatter.dart';
+import 'package:typewriter/analysis/analysis.dart';
 import 'package:typewriter/src/codec_builder.dart';
 import 'package:typewriter/src/metadata.dart';
 import 'package:typewriter/src/system_type_provider.dart';
@@ -13,6 +14,7 @@ AssetId _generatedFile(AssetId input) => input.changeExtension('.g.dart');
 
 ///
 class JsonCodecBuilder implements Builder {
+  Analysis _jsonSimple;
   MetadataRegistry _registry;
   SystemTypeProvider _typeProvider;
 
@@ -25,19 +27,25 @@ class JsonCodecBuilder implements Builder {
     if (!resolver.isLibrary(step.inputId)) {
       return;
     }
-    final coreLib = resolver.getLibraryByName('dart.core');
-    final typewriterLib = resolver.getLibraryByName('typewriter.annotations');
-    _typeProvider = new SystemTypeProvider(typewriterLib);
+    _initialize(resolver.getLibraryByName('dart.core'),
+        resolver.getLibraryByName('typewriter.annotations'));
 
     final library = resolver.getLibrary(step.inputId);
-    _registry = new MetadataRegistry(coreLib);
-    log.config('Initializing metadata map');
 
+    // TODO: refactor decision into separate class.
     for (final element in _getClassElements(library)) {
-      try {
-        _analyze(element);
-      } on Exception catch (err) {
-        log.severe(err);
+      final jsonAnnotation = element.metadata.firstWhere(
+          (an) => an.constantValue.type.isAssignableTo(_typeProvider.json),
+          orElse: () => null);
+      if (jsonAnnotation != null) {
+        final customCodec = jsonAnnotation.constantValue
+            .getField('useCustomCodec')
+            .toBoolValue();
+        if (customCodec) {
+          _analyze(element);
+        } else {
+          _jsonSimple.analyze(_registry, element);
+        }
       }
     }
 
@@ -106,34 +114,19 @@ class JsonCodecBuilder implements Builder {
                   '${decoder.name ?? ""}($x)'));
       return;
     }
-
-    if (element.unnamedConstructor?.isDefaultConstructor == null) {
-      throw new Exception('Cannot use ${element.name} because it has no '
-          'default constructor.');
-    }
-    _registry.addType(
-        element.type, new CompositeTypeMetadata(element.type, element));
-
-    if (element.fields.any(
-      (field) => field.isFinal && !field.metadata
-       .any((an) => an.constantValue.type.isAssignableTo(_typeProvider.ignore)))) {
-        throw new Exception('');
-    }
   }
 
   String _generate(ClassElement element) {
+    final fields = (_registry.getType(element.type) as CompositeTypeMetadata).fields;
     final builder = new CodecBuilder.Json(_registry, element.type);
 
     // TODO: refactor this so that analyzer saves a List of fields for each class.
     loop:
-    for (final field in element.fields.where((x) => x.isPublic)) {
+    for (final field in fields) {
       String key = field.name;
       int position = -1;
       for (final annotation in field.metadata) {
         final value = annotation.constantValue;
-        if (value.type.isAssignableTo(_typeProvider.ignore)) {
-          continue loop;
-        }
         if (value.type.isAssignableTo(_typeProvider.jsonKey)) {
           key = annotation.constantValue.getField('key').toStringValue();
           position = annotation.constantValue.getField('position').toIntValue();
@@ -151,6 +144,13 @@ class JsonCodecBuilder implements Builder {
     return builder.build();
   }
 
+  void _initialize(LibraryElement coreLib, LibraryElement typewriterLib) {
+    _typeProvider = new SystemTypeProvider(typewriterLib);
+    _registry = new MetadataRegistry(coreLib);
+    _jsonSimple = new JsonAnalysisSimple(_typeProvider);
+  }
+
+  /// TODO: refactor to grab any class with library specific class annotation
   Iterable<ClassElement> _getClassElements(LibraryElement unit) {
     return unit.importedLibraries
         .where((lib) => !lib.isDartCore && !lib.isInSdk)
