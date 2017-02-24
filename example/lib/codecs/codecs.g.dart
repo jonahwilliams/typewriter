@@ -2,6 +2,39 @@ part of typewriter.example.codecs;
 
 const jsonCodec = const JsonCodec();
 
+class TestFooDecoder extends Converter<Object, TestFoo> {
+  const TestFooDecoder();
+
+  @override
+  TestFoo convert(Object raw) {
+    var input = raw as Map<String, dynamic>;
+    var output = new TestFoo();
+    output.name = input["name"];
+    return output;
+  }
+}
+
+class TestFooEncoder extends Converter<TestFoo, Object> {
+  const TestFooEncoder();
+
+  @override
+  Object convert(TestFoo input) {
+    var output = <String, dynamic>{};
+    output["name"] = input.name;
+    return output;
+  }
+}
+
+class TestFooCodec extends Codec<TestFoo, Object> {
+  const TestFooCodec();
+
+  @override
+  Converter<Object, TestFoo> get decoder => const TestFooDecoder();
+
+  @override
+  Converter<TestFoo, Object> get encoder => const TestFooEncoder();
+}
+
 class PersonDecoder extends Converter<Object, Person> {
   const PersonDecoder();
 

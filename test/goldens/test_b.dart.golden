@@ -1,0 +1,112 @@
+part of typewriter.testing.test_b;
+
+const jsonCodec = const JsonCodec();
+
+class PersonDecoder extends Converter<Object, Person> {
+  const PersonDecoder();
+
+  @override
+  Person convert(Object raw) {
+    var input = raw as Map<String, dynamic>;
+    var output = new Person();
+    output.items = input["items"].map((x) => x).toList();
+    output.age = input["age"];
+    output.coins = input["coins"];
+    output.dog = const DogDecoder().convert(input["dog"]);
+    output.cat = const CatDecoder().convert(input["cat"]);
+    return output;
+  }
+}
+
+class PersonEncoder extends Converter<Person, Object> {
+  const PersonEncoder();
+
+  @override
+  Object convert(Person input) {
+    var output = <String, dynamic>{};
+    output["items"] = input.items.map((x) => x).toList();
+    output["age"] = input.age;
+    output["coins"] = input.coins;
+    output["dog"] = const DogEncoder().convert(input.dog);
+    output["cat"] = const CatEncoder().convert(input.cat);
+    return output;
+  }
+}
+
+class PersonCodec extends Codec<Person, Object> {
+  const PersonCodec();
+
+  @override
+  Converter<Object, Person> get decoder => const PersonDecoder();
+
+  @override
+  Converter<Person, Object> get encoder => const PersonEncoder();
+}
+
+class DogDecoder extends Converter<Object, Dog> {
+  const DogDecoder();
+
+  @override
+  Dog convert(Object raw) {
+    var input = raw as Map<String, dynamic>;
+    var output = new Dog();
+    output.name = input["name"];
+    return output;
+  }
+}
+
+class DogEncoder extends Converter<Dog, Object> {
+  const DogEncoder();
+
+  @override
+  Object convert(Dog input) {
+    var output = <String, dynamic>{};
+    output["name"] = input.name;
+    return output;
+  }
+}
+
+class DogCodec extends Codec<Dog, Object> {
+  const DogCodec();
+
+  @override
+  Converter<Object, Dog> get decoder => const DogDecoder();
+
+  @override
+  Converter<Dog, Object> get encoder => const DogEncoder();
+}
+
+class CatDecoder extends Converter<Object, Cat> {
+  const CatDecoder();
+
+  @override
+  Cat convert(Object raw) {
+    var input = raw as Map<String, dynamic>;
+    var output = new Cat();
+    output.name = input["name"];
+    output.birthday = DateTime.parse(input["birth_day"]);
+    return output;
+  }
+}
+
+class CatEncoder extends Converter<Cat, Object> {
+  const CatEncoder();
+
+  @override
+  Object convert(Cat input) {
+    var output = <String, dynamic>{};
+    output["name"] = input.name;
+    output["birth_day"] = input.birthday.toIso8601String();
+    return output;
+  }
+}
+
+class CatCodec extends Codec<Cat, Object> {
+  const CatCodec();
+
+  @override
+  Converter<Object, Cat> get decoder => const CatDecoder();
+
+  @override
+  Converter<Cat, Object> get encoder => const CatEncoder();
+}

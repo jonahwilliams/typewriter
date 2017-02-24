@@ -1,0 +1,40 @@
+part of typewriter.testing.test_a;
+
+const jsonCodec = const JsonCodec();
+
+class DogDecoder extends Converter<Object, Dog> {
+  const DogDecoder();
+
+  @override
+  Dog convert(Object raw) {
+    var input = raw as Map<String, dynamic>;
+    var output = new Dog();
+    output.names = input["names"].map((x) => x).toList();
+    output.age = input["age"];
+    output.birthday = DateTime.parse(input["birthday"]);
+    return output;
+  }
+}
+
+class DogEncoder extends Converter<Dog, Object> {
+  const DogEncoder();
+
+  @override
+  Object convert(Dog input) {
+    var output = <String, dynamic>{};
+    output["names"] = input.names.map((x) => x).toList();
+    output["age"] = input.age;
+    output["birthday"] = input.birthday.toIso8601String();
+    return output;
+  }
+}
+
+class DogCodec extends Codec<Dog, Object> {
+  const DogCodec();
+
+  @override
+  Converter<Object, Dog> get decoder => const DogDecoder();
+
+  @override
+  Converter<Dog, Object> get encoder => const DogEncoder();
+}

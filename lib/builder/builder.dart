@@ -113,7 +113,14 @@ class JsonCodecBuilder implements Builder {
 
   /// TODO: refactor to grab any class with library specific class annotation
   Iterable<ClassElement> _getClassElements(LibraryElement unit) {
-    return unit.importedLibraries
+    final classes = unit.units.expand((unit) => unit.unit.declarations)
+        .where((dec) => dec is ClassDeclaration)
+        .map((dec) => (dec as ClassDeclaration).element)
+        .where((el) =>
+        el.metadata.any(
+            (an) =>
+                an.constantValue.type.isAssignableTo(_typeProvider.json)));
+    final importedClasses = unit.importedLibraries
         .where((lib) => !lib.isDartCore && !lib.isInSdk)
         .expand((el) => el.units.expand((unit) => unit.unit.declarations))
         .where((dec) => dec is ClassDeclaration)
@@ -122,5 +129,9 @@ class JsonCodecBuilder implements Builder {
         el.metadata.any(
                 (an) =>
                 an.constantValue.type.isAssignableTo(_typeProvider.json)));
+
+    return <ClassElement>[]
+        ..addAll(classes)
+        ..addAll(importedClasses);
   }
 }
