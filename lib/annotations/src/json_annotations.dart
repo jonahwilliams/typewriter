@@ -22,13 +22,13 @@ class Json implements ClassAnnotation {
 }
 
 ///
-class JsonEncoder implements EncodeAnnotation {
+class JsonEncode implements EncodeAnnotation {
   ///
-  const JsonEncoder();
+  const JsonEncode();
 }
 
 ///
-class JsonDecoder implements DecodeAnnotation {
+class JsonDecode implements DecodeAnnotation {
   ///
-  const JsonDecoder();
+  const JsonDecode();
 }

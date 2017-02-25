@@ -60,14 +60,15 @@ class JsonAnalysisCustom implements Analysis {
   void analyze(ClassElement element) {
     final encoder = element.methods.firstWhere(
         (el) => el.metadata.any((ann) =>
-            ann.constantValue.type.isAssignableTo(_typeProvider.jsonEncoder)),
+            ann.constantValue.type.isAssignableTo(_typeProvider.jsonEncode)),
         orElse: () => null);
+
     if (encoder != null) {
       final decoder = element.constructors.firstWhere(
           (ctr) =>
               ctr.isFactory &&
               ctr.metadata.any((ann) => ann.constantValue.type
-                  .isAssignableTo(_typeProvider.jsonDecoder)),
+                  .isAssignableTo(_typeProvider.jsonDecode)),
           orElse: () => null);
       if (decoder == null) {
         errors

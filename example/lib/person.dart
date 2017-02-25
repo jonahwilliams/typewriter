@@ -36,7 +36,7 @@ class Foo {
   final int x;
   final int y;
 
-  @JsonDecoder()
+  @JsonDecode()
   factory Foo(Object raw) {
     final input = raw as Map<String, dynamic>;
     return new Foo._(input['x'] as int, input['y'] as int);
@@ -44,7 +44,7 @@ class Foo {
 
   Foo._(this.x, this.y);
 
-  @JsonEncoder()
+  @JsonEncode()
   Object encode() {
     return {'x': x, 'y': y};
   }

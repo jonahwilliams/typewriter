@@ -1,12 +1,8 @@
 import 'dart:io';
 import 'dart:async';
-import 'dart:collection';
 
-
-import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 import 'package:build_runner/build_runner.dart';
-import 'package:source_gen/source_gen.dart';
 import 'package:typewriter/builder/builder.dart';
 
 class Result {

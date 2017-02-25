@@ -12,7 +12,7 @@ class PersonDecoder extends Converter<Object, Person> {
     output.items = input["items"].map((x) => x).toList();
     output.age = input["age"];
     output.coins = input["coins"];
-    output.dog = const DogDecoder().convert(input["dog"]);
+    output.dog = new Dog(input["dog"]);
     output.cat = const CatDecoder().convert(input["cat"]);
     return output;
   }
@@ -27,7 +27,7 @@ class PersonEncoder extends Converter<Person, Object> {
     output["items"] = input.items.map((x) => x).toList();
     output["age"] = input.age;
     output["coins"] = input.coins;
-    output["dog"] = const DogEncoder().convert(input.dog);
+    output["dog"] = input.dog.encode();
     output["cat"] = const CatEncoder().convert(input.cat);
     return output;
   }
@@ -41,39 +41,6 @@ class PersonCodec extends Codec<Person, Object> {
 
   @override
   Converter<Person, Object> get encoder => const PersonEncoder();
-}
-
-class DogDecoder extends Converter<Object, Dog> {
-  const DogDecoder();
-
-  @override
-  Dog convert(Object raw) {
-    var input = raw as Map<String, dynamic>;
-    var output = new Dog();
-    output.name = input["name"];
-    return output;
-  }
-}
-
-class DogEncoder extends Converter<Dog, Object> {
-  const DogEncoder();
-
-  @override
-  Object convert(Dog input) {
-    var output = <String, dynamic>{};
-    output["name"] = input.name;
-    return output;
-  }
-}
-
-class DogCodec extends Codec<Dog, Object> {
-  const DogCodec();
-
-  @override
-  Converter<Object, Dog> get decoder => const DogDecoder();
-
-  @override
-  Converter<Dog, Object> get encoder => const DogEncoder();
 }
 
 class CatDecoder extends Converter<Object, Cat> {
