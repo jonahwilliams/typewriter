@@ -1,31 +1,16 @@
 import 'package:analyzer/dart/element/type.dart';
 import 'metadata.dart';
 
-///
-abstract class CodecBuilder {
-  ///
-  factory CodecBuilder.Json(MetadataRegistry registry, DartType type) {
-    return new JsonCodecBuilder(registry, type);
-  }
-
-  ///
-  void addField(
-      String name, DartType type, bool isRepeated, String key, int position);
-
-  /// Returns a String representing the Codec.
-  String build();
-}
 
 ///
-class JsonCodecBuilder implements CodecBuilder {
+class JsonCodecBuilder {
   final MetadataRegistry _registry;
   final DartType _type;
 
   String _name;
   String _codec;
-
-  final StringBuffer _encoder = new StringBuffer();
-  final StringBuffer _decoder = new StringBuffer();
+  StringBuffer _encoder = new StringBuffer();
+  StringBuffer _decoder = new StringBuffer();
 
   ///
   JsonCodecBuilder(this._registry, this._type) {
@@ -41,6 +26,7 @@ class JsonCodecBuilder implements CodecBuilder {
       Converter<$_name, Object> get encoder => const ${_name}Encoder();
     }
     ''';
+
     _decoder.write('''
       class ${_name}Decoder extends Converter<Object, $_name> {
 
@@ -62,9 +48,7 @@ class JsonCodecBuilder implements CodecBuilder {
     ''');
   }
 
-  @override
-  void addField(
-      String name, DartType type, bool isRepeated, String key, int _) {
+  void addField(String name, DartType type, bool isRepeated, String key) {
     final metadata = _registry.getType(type);
     if (metadata == null) {
       throw new Exception(
@@ -99,7 +83,64 @@ class JsonCodecBuilder implements CodecBuilder {
     _decoder.writeln(';');
   }
 
-  @override
+  String build() {
+    final result = new StringBuffer()
+      ..write(_decoder)
+      ..write('return output;}}\n\n')
+      ..write(_encoder)
+      ..write('return output;}}\n\n')
+      ..write(_codec);
+    return result.toString();
+  }
+}
+
+class XmlCodecBuilder {
+  final MetadataRegistry _registry;
+  final DartType _type;
+
+  String _name;
+  String _codec;
+  StringBuffer _encoder = new StringBuffer();
+  StringBuffer _decoder = new StringBuffer();
+
+  XmlCodecBuilder(this._type, this._registry) {
+    _name = _type.displayName;
+    _codec = '''
+    class ${_name}Codec extends Codec<$_name, XmlNode> {
+      const ${_name}Codec();
+
+      @override
+      Converter<> get encoder => const ${_name}Encoder();
+
+      @override
+      Converter<> get decoder => const ${_name}Decoder();
+    }
+    ''';
+    _encoder.write('''
+    class ${_name}Encoder extends Converter<> {
+      const ${_name}Encoder();
+
+      @override
+      XmlNode convert($_name input) {
+    ''');
+    _decoder.write('''
+    class ${_name}Decoder extends Converter<> {
+      const ${_name}Decoder();
+
+      @override
+      $_name convert(XmlNode input) {
+    ''');
+  }
+
+  void addField() {
+
+  }
+
+  void addAttribute() {
+
+  }
+
+
   String build() {
     final result = new StringBuffer()
       ..write(_decoder)

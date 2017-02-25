@@ -13,14 +13,14 @@ import 'package:typewriter/src/system_type_provider.dart';
 AssetId _generatedFile(AssetId input) => input.changeExtension('.g.dart');
 
 ///
-class JsonCodecBuilder implements Builder {
+class CodecBuilder implements Builder {
   Analysis _jsonSimple;
   Analysis _jsonCustom;
   MetadataRegistry _registry;
   SystemTypeProvider _typeProvider;
 
   ///
-  JsonCodecBuilder();
+  CodecBuilder();
 
   @override
   Future<Null> build(BuildStep step) async {
@@ -80,24 +80,22 @@ class JsonCodecBuilder implements Builder {
   String _generate(ClassElement element) {
     final fields = (_registry.getType(element.type) as CompositeTypeMetadata)
         .fields;
-    final builder = new CodecBuilder.Json(_registry, element.type);
+    final builder = new JsonCodecBuilder(_registry, element.type);
 
     for (final field in fields) {
       String key = field.name;
-      int position = -1;
       for (final annotation in field.metadata) {
         final value = annotation.constantValue;
         if (value.type.isAssignableTo(_typeProvider.jsonKey)) {
           key = annotation.constantValue.getField('key').toStringValue();
-          position = annotation.constantValue.getField('position').toIntValue();
         }
       }
       // Temp hack because type APIs did not work as I imagined.
       if (field.type.displayName.contains('List')) {
         final el = (field.type as ParameterizedType).typeArguments.first;
-        builder.addField(field.name, el, true, key, position);
+        builder.addField(field.name, el, true, key);
       } else {
-        builder.addField(field.name, field.type, false, key, position);
+        builder.addField(field.name, field.type, false, key);
       }
     }
 

@@ -4,7 +4,7 @@ import 'package:typewriter/builder/builder.dart';
 
 
 final jsonBuild = new Phase()..addAction(
-    new JsonCodecBuilder(),
+    new CodecBuilder(),
     new InputSet('typewriter', const ['example/lib/codecs/codecs.dart']));
 
 final phases = new PhaseGroup()

@@ -8,9 +8,6 @@ part 'src/xml_annotations.dart';
 abstract class DataAnnotation {
   ///
   String get key;
-
-  ///
-  int get position;
 }
 
 /// Basic information that can be added onto a class/

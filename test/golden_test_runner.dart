@@ -15,7 +15,7 @@ class Result {
 
 
 Future<Result> testGolden(String name) async {
-  final phase = new PhaseGroup.singleAction(new JsonCodecBuilder(),
+  final phase = new PhaseGroup.singleAction(new CodecBuilder(),
       new InputSet('typewriter', ['test/goldens/$name.dart']));
   await build(phase, deleteFilesByDefault: true);
 

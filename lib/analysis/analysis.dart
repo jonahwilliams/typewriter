@@ -6,6 +6,7 @@ import 'package:typewriter/exceptions/exceptions.dart';
 import 'package:typewriter/src/system_type_provider.dart';
 
 part 'src/json_analysis.dart';
+part 'src/xml_analysis.dart';
 
 /// Performs analysis on a [ClassElement] to determine if a valid codec can
 /// be constructed.

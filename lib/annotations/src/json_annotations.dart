@@ -5,9 +5,6 @@ class JsonKey implements DataAnnotation {
   @override
   final String key;
 
-  @override
-  final int position = -1;
-
   /// Creates a [JsonKey] annotation.
   const JsonKey(this.key);
 }
