@@ -18,7 +18,6 @@ class Item {
   int id;
   String description;
   RegExp why;
-  Foo foo;
 
   @Ignore()
   String other;
@@ -31,21 +30,21 @@ class Dog {
   DateTime birthday;
 }
 
-@Json(useCustomCodec: true)
-class Foo {
-  final int x;
-  final int y;
-
-  @JsonDecode()
-  factory Foo(Object raw) {
-    final input = raw as Map<String, dynamic>;
-    return new Foo._(input['x'] as int, input['y'] as int);
-  }
-
-  Foo._(this.x, this.y);
-
-  @JsonEncode()
-  Object encode() {
-    return {'x': x, 'y': y};
-  }
-}
+//@Json(useCustomCodec: true)
+//class Foo {
+//  final int x;
+//  final int y;
+//
+//  @JsonDecode()
+//  factory Foo(Object raw) {
+//    final input = raw as Map<String, dynamic>;
+//    return new Foo._(input['x'] as int, input['y'] as int);
+//  }
+//
+//  Foo._(this.x, this.y);
+//
+//  @JsonEncode()
+//  Object encode() {
+//    return {'x': x, 'y': y};
+//  }
+//}

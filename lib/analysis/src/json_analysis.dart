@@ -34,7 +34,7 @@ class JsonAnalysisSimple implements Analysis {
               .isAssignableTo(_typeProvider.jsonKey),
           orElse: () => null);
       final key = keyAnnotation != null
-          ? keyAnnotation.constantValue.getField('key')
+          ? keyAnnotation.constantValue.getField('key').toStringValue()
           : field.name;
       if (field.type.displayName.contains('List')) {
         fields.add(new JsonFieldDescription(key, field.name, true,
