@@ -78,7 +78,7 @@ class JsonFieldDescription {
   final DartType type;
 
   const JsonFieldDescription(this.field, this.type,
-      {this.repeated = false, String key})
+      {this.repeated: false, String key})
       : this.key = key ?? field;
 
   StatementBuilder buildEncoder(Map<DartType, Metadata> registry) {

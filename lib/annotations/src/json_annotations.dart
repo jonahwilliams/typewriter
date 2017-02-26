@@ -15,7 +15,7 @@ class Json implements ClassAnnotation {
   final bool useCustomCodec;
 
   ///
-  const Json({this.useCustomCodec = false});
+  const Json({this.useCustomCodec: false});
 }
 
 ///
