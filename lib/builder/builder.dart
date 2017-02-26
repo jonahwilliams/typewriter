@@ -59,8 +59,10 @@ class CodecBuilder implements Builder {
     for (final codec in codecs) {
       contentBuffer
           .write(codec.buildEncoder(_jsonRegistry).buildClass().toSource());
-      contentBuffer.write(codec.buildDecoder(_jsonRegistry).buildClass().toSource());
-      contentBuffer.write(codec.buildCodec(_jsonRegistry).buildClass().toSource());
+      contentBuffer
+          .write(codec.buildDecoder(_jsonRegistry).buildClass().toSource());
+      contentBuffer
+          .write(codec.buildCodec(_jsonRegistry).buildClass().toSource());
     }
 
     final result = dartFormatter.format(contentBuffer.toString());
