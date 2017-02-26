@@ -34,7 +34,7 @@ class SystemTypeProvider {
         library.getType('Json').type,
         library.getType('JsonEncode').type,
         library.getType('JsonDecode').type,
-        library.getType('xml').type,
+        library.getType('Xml').type,
         library.getType('XmlElement').type,
         library.getType('XmlAttribute').type);
   }
