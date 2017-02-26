@@ -5,27 +5,27 @@ class JsonKey implements DataAnnotation {
   @override
   final String key;
 
-  @override
-  final int position = -1;
-
-  ///
+  /// Creates a [JsonKey] annotation.
   const JsonKey(this.key);
 }
 
 ///
 class Json implements ClassAnnotation {
+  /// TODO: think of better name
+  final bool useCustomCodec;
+
   ///
-  const Json();
+  const Json({this.useCustomCodec = false});
 }
 
 ///
-class JsonEncoder implements EncodeAnnotation {
+class JsonEncode implements EncodeAnnotation {
   ///
-  const JsonEncoder();
+  const JsonEncode();
 }
 
 ///
-class JsonDecoder implements DecodeAnnotation {
+class JsonDecode implements DecodeAnnotation {
   ///
-  const JsonDecoder();
+  const JsonDecode();
 }

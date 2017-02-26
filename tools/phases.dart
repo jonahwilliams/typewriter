@@ -3,10 +3,10 @@ import 'package:source_gen/source_gen.dart';
 import 'package:typewriter/builder/builder.dart';
 
 
-final analysisPhase = new Phase()..addAction(
-    new CodecAnalyzerStep(),
+final jsonBuild = new Phase()..addAction(
+    new CodecBuilder(),
     new InputSet('typewriter', const ['example/lib/codecs/codecs.dart']));
 
 final phases = new PhaseGroup()
-  ..addPhase(analysisPhase);
+  ..addPhase(jsonBuild);
 

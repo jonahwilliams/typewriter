@@ -1,126 +1,100 @@
 part of typewriter.example.codecs;
 
-const jsonCodec = const JsonCodec();
-
-class PersonDecoder extends Converter<Object, Person> {
-  const PersonDecoder();
-
-  @override
-  Person convert(Object raw) {
-    var input = raw as Map<String, dynamic>;
-    var output = new Person();
-    output.name = input["name"];
-    output.age = input["age"];
-    output.money = input["money"];
-    output.isAlive = input["is_alive"];
-    output.item = const ItemDecoder().convert(input["item"]);
-    output.dog = const DogDecoder().convert(input["dog"]);
-    output.opaque = new Symbol(input["opaque"]);
-    return output;
-  }
-}
-
-class PersonEncoder extends Converter<Person, Object> {
-  const PersonEncoder();
-
-  @override
+class _PersonEncoder extends Converter<Person, Object> {
+  _PersonEncoder();
   Object convert(Person input) {
     var output = <String, dynamic>{};
-    output["name"] = input.name;
-    output["age"] = input.age;
-    output["money"] = input.money;
-    output["is_alive"] = input.isAlive;
-    output["item"] = const ItemEncoder().convert(input.item);
-    output["dog"] = const DogEncoder().convert(input.dog);
-    output["opaque"] = input.opaque.toString();
+    output['name'] = input.name;
+    output['age'] = input.age;
+    output['money'] = input.money;
+    output['is_alive'] = input.isAlive;
+    output['item'] = new _ItemEncoder().convert(input.item);
+    output['dog'] = new _DogEncoder().convert(input.dog);
+    output['opaque'] = input.opaque.toString();
     return output;
   }
 }
 
-class PersonCodec extends Codec<Person, Object> {
-  const PersonCodec();
-
-  @override
-  Converter<Object, Person> get decoder => const PersonDecoder();
-
-  @override
-  Converter<Person, Object> get encoder => const PersonEncoder();
-}
-
-class ItemDecoder extends Converter<Object, Item> {
-  const ItemDecoder();
-
-  @override
-  Item convert(Object raw) {
-    var input = raw as Map<String, dynamic>;
-    var output = new Item();
-    output.name = input["name"];
-    output.id = input["id"];
-    output.description = input["description"];
-    output.why = new RegExp(input["why"]);
+class _PersonDecoder extends Converter<Object, Person> {
+  _PersonDecoder();
+  Person convert(Object rawInput) {
+    var input = rawInput as Map<String, dynamic>;
+    var output = new Person();
+    output.name = input['name'];
+    output.age = input['age'];
+    output.money = input['money'];
+    output.isAlive = input['is_alive'];
+    output.item = new _ItemDecoder().convert(input['item']);
+    output.dog = new _DogDecoder().convert(input['dog']);
+    output.opaque = new Symbol(input['opaque']);
     return output;
   }
 }
 
-class ItemEncoder extends Converter<Item, Object> {
-  const ItemEncoder();
+class PersonCodec extends Codec<Object, Person> {
+  PersonCodec();
+  Converter<Person, Object> get encoder => new _PersonEncoder();
+  Converter<Object, Person> get decoder => new _PersonDecoder();
+}
 
-  @override
+class _ItemEncoder extends Converter<Item, Object> {
+  _ItemEncoder();
   Object convert(Item input) {
     var output = <String, dynamic>{};
-    output["name"] = input.name;
-    output["id"] = input.id;
-    output["description"] = input.description;
-    output["why"] = input.why.pattern;
+    output['name'] = input.name;
+    output['id'] = input.id;
+    output['description'] = input.description;
+    output['why'] = input.why.toString();
+    output['other'] = input.other;
     return output;
   }
 }
 
-class ItemCodec extends Codec<Item, Object> {
-  const ItemCodec();
-
-  @override
-  Converter<Object, Item> get decoder => const ItemDecoder();
-
-  @override
-  Converter<Item, Object> get encoder => const ItemEncoder();
-}
-
-class DogDecoder extends Converter<Object, Dog> {
-  const DogDecoder();
-
-  @override
-  Dog convert(Object raw) {
-    var input = raw as Map<String, dynamic>;
-    var output = new Dog();
-    output.names = input["names"].map((x) => x).toList();
-    output.age = input["age"];
-    output.birthday = DateTime.parse(input["birthday"]);
-    output.myFoo = new Foo(input["myFoo"]);
+class _ItemDecoder extends Converter<Object, Item> {
+  _ItemDecoder();
+  Item convert(Object rawInput) {
+    var input = rawInput as Map<String, dynamic>;
+    var output = new Item();
+    output.name = input['name'];
+    output.id = input['id'];
+    output.description = input['description'];
+    output.why = new RegExp(input['why']);
+    output.other = input['other'];
     return output;
   }
 }
 
-class DogEncoder extends Converter<Dog, Object> {
-  const DogEncoder();
+class ItemCodec extends Codec<Object, Item> {
+  ItemCodec();
+  Converter<Item, Object> get encoder => new _ItemEncoder();
+  Converter<Object, Item> get decoder => new _ItemDecoder();
+}
 
-  @override
+class _DogEncoder extends Converter<Dog, Object> {
+  _DogEncoder();
   Object convert(Dog input) {
     var output = <String, dynamic>{};
-    output["names"] = input.names.map((x) => x).toList();
-    output["age"] = input.age;
-    output["birthday"] = input.birthday.toIso8601String();
-    output["myFoo"] = input.myFoo.encode();
+    output['names'] = input.names.map((x) => x).toList();
+    output['age'] = input.age;
+    output['birthday'] = input.birthday.toIso8601String();
     return output;
   }
 }
 
-class DogCodec extends Codec<Dog, Object> {
-  const DogCodec();
+class _DogDecoder extends Converter<Object, Dog> {
+  _DogDecoder();
+  Dog convert(Object rawInput) {
+    var input = rawInput as Map<String, dynamic>;
+    var output = new Dog();
+    output.names = input['names'];
+    output.age = input['age'];
+    output.birthday = DateTime.parse(input['birthday']);
+    return output;
+  }
+}
 
-  @override
-  Converter<Object, Dog> get decoder => const DogDecoder();
-
-  @override
-  Converter<Dog, Object> get encoder => const DogEncoder();
+class DogCodec extends Codec<Object, Dog> {
+  DogCodec();
+  Converter<Dog, Object> get encoder => new _DogEncoder();
+  Converter<Object, Dog> get decoder => new _DogDecoder();
 }
