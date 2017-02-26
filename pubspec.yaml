@@ -2,7 +2,7 @@ name: typewriter
 description: A codec generation libarary for XML and JSON.
 version: 0.0.1
 author: Jonah Williams <jonahwilliams@google.com>
-#homepage: https://www.example.com
+homepage: https://github.com/jonahwilliams/typewriter
 
 environment:
   sdk: '>=1.0.0 <2.0.0'
@@ -11,13 +11,13 @@ dependencies:
   analyzer: '0.29.7'
   quiver: '0.24.0'
   source_gen: '0.5.4+2'
-  build_runner:  '>=0.3.0'
-  yaml:  '>=2.1.12'
-  xml: '>=2.5.0'
-  code_builder: '>=0.1.0'
-  dart_style:
+  build_runner:  '0.3.0'
+  yaml:  '2.1.12'
+  xml: '2.5.0'
+  code_builder: '0.1.0'
+  dart_style: '0.2.16'
 
 dev_dependencies:
-  resolver:
+  resolver: '0.1.1'
   test: '>=0.12.0 <0.13.0'
   mockito:  '1.0.1'
