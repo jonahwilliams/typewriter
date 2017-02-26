@@ -8,7 +8,7 @@ class SystemTypeProvider {
 
   /// An annotation which provides a different key name.
   final DartType jsonKey;
-  
+
   /// An annotation which tells analysis to use the json builder.
   final DartType json;
 
@@ -18,6 +18,14 @@ class SystemTypeProvider {
   /// Same as above, must be paired to work correctly.
   final DartType jsonDecode;
 
+  /// An annotation which tells analysis to use the xml builder.
+  final DartType xml;
+
+  /// An annotation which tells analysis to override the default behavior for
+  /// xml builders
+  final DartType xmlElement;
+  final DartType xmlAttribute;
+
   /// Builds a new [SystemTypeProvider] from the package:typewriter annotation library element.
   factory SystemTypeProvider(LibraryElement library) {
     return new SystemTypeProvider._(
@@ -25,9 +33,12 @@ class SystemTypeProvider {
         library.getType('JsonKey').type,
         library.getType('Json').type,
         library.getType('JsonEncode').type,
-        library.getType('JsonDecode').type);
+        library.getType('JsonDecode').type,
+        library.getType('xml').type,
+        library.getType('XmlElement').type,
+        library.getType('XmlAttribute').type);
   }
 
-  SystemTypeProvider._(
-      this.ignore, this.jsonKey, this.json, this.jsonEncode, this.jsonDecode);
+  SystemTypeProvider._(this.ignore, this.jsonKey, this.json, this.jsonEncode,
+      this.jsonDecode, this.xml, this.xmlElement, this.xmlAttribute);
 }

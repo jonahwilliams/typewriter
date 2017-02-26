@@ -4,6 +4,8 @@ import 'package:test/test.dart';
 import 'package:typewriter/metadata/metadata.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:typewriter/metadata/xml_description.dart';
+
 void main() {
   final stringType = new MockType();
   final intType = new MockType();

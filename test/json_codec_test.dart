@@ -4,6 +4,8 @@ import 'package:test/test.dart';
 import 'package:typewriter/metadata/metadata.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:typewriter/metadata/json_description.dart';
+
 void main() {
   final stringType = new MockType();
   final intType = new MockType();
@@ -18,8 +20,8 @@ void main() {
   group('Json encoder', () {
     test('encodes a class', () {
       final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', 'name', false, stringType),
-        new JsonFieldDescription('id', 'id', false, intType),
+        new JsonFieldDescription('name', stringType),
+        new JsonFieldDescription('id', intType),
       ]);
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
@@ -40,8 +42,8 @@ void main() {
 
     test('encodes a class with repeated fields', () {
       final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', 'name', false, stringType),
-        new JsonFieldDescription('values', 'values', true, intType),
+        new JsonFieldDescription('name',  stringType),
+        new JsonFieldDescription('values', intType, repeated: true),
       ]);
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
@@ -65,8 +67,8 @@ void main() {
   group('Json decoder', () {
     test('decodes a class', () {
       final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', 'name', false, stringType),
-        new JsonFieldDescription('id', 'id', false, intType),
+        new JsonFieldDescription('name', stringType),
+        new JsonFieldDescription('id', intType),
       ]);
       final decoder =
           prettyToSource(description.buildDecoder(registry).buildClass());
@@ -90,8 +92,8 @@ void main() {
   group('Json Codec', () {
     test('creates a class which exposes the encoder and decoder', () {
       final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', 'name', false, stringType),
-        new JsonFieldDescription('id', 'id', false, intType),
+        new JsonFieldDescription('name', stringType),
+        new JsonFieldDescription('id', intType),
       ]);
       final codec =
           prettyToSource(description.buildCodec(registry).buildClass());

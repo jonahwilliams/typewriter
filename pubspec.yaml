@@ -17,5 +17,6 @@ dependencies:
   code_builder: 1.0.0-beta+3
 
 dev_dependencies:
+  resolver:
   test: '>=0.12.0 <0.13.0'
   mockito:

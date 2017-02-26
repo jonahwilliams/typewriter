@@ -5,6 +5,8 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:typewriter/metadata/metadata.dart';
 import 'package:typewriter/exceptions/exceptions.dart';
 import 'package:typewriter/src/system_type_provider.dart';
+import 'package:typewriter/metadata/json_description.dart';
+import 'package:typewriter/metadata/xml_description.dart';
 
 part 'src/json_analysis.dart';
 part 'src/xml_analysis.dart';

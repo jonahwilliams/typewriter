@@ -33,15 +33,16 @@ class JsonAnalysisSimple implements Analysis {
           (annotation) => annotation.constantValue.type
               .isAssignableTo(_typeProvider.jsonKey),
           orElse: () => null);
-      final key = keyAnnotation != null
-          ? keyAnnotation.constantValue.getField('key').toStringValue()
-          : field.name;
+      final key =
+          keyAnnotation?.constantValue?.getField('key')?.toStringValue();
+
       if (field.type.displayName.contains('List')) {
-        fields.add(new JsonFieldDescription(key, field.name, true,
-            (field.type as ParameterizedType).typeArguments.first));
+        final type = (field.type as ParameterizedType).typeArguments.first;
+        fields.add(new JsonFieldDescription(
+            field.name, type,
+            repeated: true, key: key));
       } else {
-        fields
-            .add(new JsonFieldDescription(key, field.name, false, field.type));
+        fields.add(new JsonFieldDescription(field.name, field.type, key: key));
       }
     }
     registry[element.type] = new Metadata.composite(element.name);
