@@ -14,8 +14,6 @@ part 'src/xml_analysis.dart';
 /// Performs analysis on a [ClassElement] to determine if a valid codec can
 /// be constructed.
 abstract class Analysis {
-
   /// Analyzes the [ClassElement] to determine if.
   BuildsCodec analyze(ClassElement element, Map<DartType, Metadata> registry);
-
 }

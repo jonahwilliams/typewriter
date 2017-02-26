@@ -6,7 +6,7 @@ import 'metadata.dart';
 
 class XmlDescription implements BuildsCodec {
   static final _xmlType =
-  new TypeBuilder('XmlNode', importFrom: 'package:xml/xml.dart');
+      new TypeBuilder('XmlNode', importFrom: 'package:xml/xml.dart');
   static final _builder = reference('builder');
   static final _output = reference('output');
 
@@ -83,11 +83,11 @@ class XmlDescription implements BuildsCodec {
       ..addMethod(new MethodBuilder.getter('encoder',
           returns: reference('_${name}Encoder').newInstance(const []),
           returnType:
-          new TypeBuilder('Converter', genericTypes: [type, _xmlType])))
+              new TypeBuilder('Converter', genericTypes: [type, _xmlType])))
       ..addMethod(new MethodBuilder.getter('decoder',
           returns: reference('_${name}Decoder').newInstance(const []),
           returnType:
-          new TypeBuilder('Converter', genericTypes: [_xmlType, type])));
+              new TypeBuilder('Converter', genericTypes: [_xmlType, type])));
   }
 }
 
@@ -119,10 +119,10 @@ class XmlElementDescription {
         namedArguments: attributes.isEmpty
             ? const {}
             : {
-          'nest': new MethodBuilder.closure()
-            ..addStatements(
-                attributes.map((x) => x.buildEncoder(registry)))
-        });
+                'nest': new MethodBuilder.closure()
+                  ..addStatements(
+                      attributes.map((x) => x.buildEncoder(registry)))
+              });
   }
 
   StatementBuilder buildDecoder(Map<DartType, Metadata> registry) {

@@ -39,8 +39,15 @@ class SystemTypeProvider {
         library.getType('XmlAttribute').type);
   }
 
-  SystemTypeProvider._(this._ignore, this._jsonKey, this._json, this._jsonEncode,
-      this._jsonDecode, this._xml, this._xmlElement, this._xmlAttribute);
+  SystemTypeProvider._(
+      this._ignore,
+      this._jsonKey,
+      this._json,
+      this._jsonEncode,
+      this._jsonDecode,
+      this._xml,
+      this._xmlElement,
+      this._xmlAttribute);
 
   bool isIgnore(DartType type) => type.isAssignableTo(_json);
   bool isJsonKey(DartType type) => type.isAssignableTo(_jsonKey);

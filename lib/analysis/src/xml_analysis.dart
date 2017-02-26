@@ -21,8 +21,8 @@ class XmlSimpleAnalysis implements Analysis {
     // static fields are OK, and any fields with @Ignore are completely ignored.
     final fields = <XmlElementDescription>[];
     for (final field in element.fields) {
-      if (field.metadata.any(
-          (an) => _typeProvider.isIgnore(an.constantValue.type))) {
+      if (field.metadata
+          .any((an) => _typeProvider.isIgnore(an.constantValue.type))) {
         continue;
       }
       if (field.isFinal) {

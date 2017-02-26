@@ -1,4 +1,3 @@
-
 /// Occurs when a Class uses the `extends` keyword to implement
 /// inheritance, which is disallowed for typewriter classes.
 ///
@@ -11,8 +10,8 @@ class ClassUsingExtendsKeywordException implements Exception {
 
   @override
   String toString() =>
-    'Cannot generate a codec for $_className, because it extends a class'
-    'other than object.';
+      'Cannot generate a codec for $_className, because it extends a class'
+      'other than object.';
 }
 
 /// Occurs when a Class has a default constructor with arguments.
@@ -26,8 +25,8 @@ class ClassNoArgConstructorException implements Exception {
 
   @override
   String toString() =>
-    'Cannot generate a codec for $_className, because the default constructor'
-    ' has arguments.';
+      'Cannot generate a codec for $_className, because the default constructor'
+      ' has arguments.';
 }
 
 /// Occurs when a class has a final field.

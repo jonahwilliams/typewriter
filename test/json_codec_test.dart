@@ -16,7 +16,6 @@ void main() {
         new Metadata.scalar('int', encoder: (arg) => arg, decoder: (arg) => arg)
   };
 
-
   group('Json encoder', () {
     test('encodes a class', () {
       final description = new JsonDescription('People', [
@@ -42,7 +41,7 @@ void main() {
 
     test('encodes a class with repeated fields', () {
       final description = new JsonDescription('People', [
-        new JsonFieldDescription('name',  stringType),
+        new JsonFieldDescription('name', stringType),
         new JsonFieldDescription('values', intType, repeated: true),
       ]);
       final encoder =

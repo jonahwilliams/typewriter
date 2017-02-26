@@ -10,7 +10,8 @@ abstract class BuildsCodec {
   ClassBuilder buildEncoder(Map<DartType, Metadata> registry);
 }
 
-typedef ExpressionBuilder ExpressionBuilderBuilder(ExpressionBuilder expressionBuilder);
+typedef ExpressionBuilder ExpressionBuilderBuilder(
+    ExpressionBuilder expressionBuilder);
 
 /// Builds an initial map of serialization information for xml
 ///

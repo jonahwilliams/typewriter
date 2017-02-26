@@ -22,23 +22,23 @@ class JsonAnalysisSimple implements Analysis {
     // static fields are OK, and any fields with @Ignore are completely ignored.
     final fields = <JsonFieldDescription>[];
     for (final field in element.fields) {
-      if (field.metadata.any(
-          (an) => _typeProvider.isIgnore(an.constantValue.type))) {
+      if (field.metadata
+          .any((an) => _typeProvider.isIgnore(an.constantValue.type))) {
         continue;
       }
       if (field.isFinal) {
         throw new ClassFinalFieldException(element.displayName);
       }
       final keyAnnotation = field.metadata.firstWhere(
-          (annotation) => _typeProvider.isJsonKey(annotation.constantValue.type),
+          (annotation) =>
+              _typeProvider.isJsonKey(annotation.constantValue.type),
           orElse: () => null);
       final key =
           keyAnnotation?.constantValue?.getField('key')?.toStringValue();
 
       if (field.type.displayName.contains('List')) {
         final type = (field.type as ParameterizedType).typeArguments.first;
-        fields.add(new JsonFieldDescription(
-            field.name, type,
+        fields.add(new JsonFieldDescription(field.name, type,
             repeated: true, key: key));
       } else {
         fields.add(new JsonFieldDescription(field.name, field.type, key: key));

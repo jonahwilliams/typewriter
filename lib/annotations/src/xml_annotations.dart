@@ -4,6 +4,7 @@ part of typewriter.annotations;
 class XmlElement implements DataAnnotation {
   @override
   final String key;
+
   ///
   const XmlElement(this.key);
 }
