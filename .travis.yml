@@ -8,4 +8,4 @@ dart:
 cache:
   directories:
     - $HOME/.pub-cache
-script: ./tool/presubmit.sh
+script: ./tools/presubmit.sh
