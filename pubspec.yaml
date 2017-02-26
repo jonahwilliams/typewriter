@@ -15,6 +15,7 @@ dependencies:
   yaml:  '>=2.1.12'
   xml: '>=2.5.0'
   code_builder: '>=0.1.0'
+  dart_style:
 
 dev_dependencies:
   resolver:

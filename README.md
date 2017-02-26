@@ -1,4 +1,4 @@
-# Typewriter
+# Typewriter [![Build Status](https://travis-ci.org/jonahwilliams/typewriter.svg?branch=master)](https://travis-ci.org/jonahwilliams/typewriter)
 
 <b>Typewritter</b> is a Dart library for generating [codecs](https://www.dartlang.org/articles/libraries/converters-and-codecs), encoder/decoder pairs for serialization.  Serialization code is repetitive and time consuming to write.  Instead of using reflection/mirrors, Typewriter enables developers to generate configurable codecs automatically from Dart source code.
 
