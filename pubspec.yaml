@@ -1,5 +1,5 @@
 name: typewriter
-description: A starting point for Dart libraries or applications.
+description: A codec generation libarary for XML and JSON.
 version: 0.0.1
 author: Jonah Williams <jonahwilliams@google.com>
 #homepage: https://www.example.com
@@ -8,15 +8,15 @@ environment:
   sdk: '>=1.0.0 <2.0.0'
 
 dependencies:
-  analyzer:
-  quiver:
-  source_gen:
-  build_runner:
-  yaml:
-  xml: 2.5.0
-  code_builder: 1.0.0-beta+3
+  analyzer: '0.29.7'
+  quiver: '0.24.0'
+  source_gen: '0.5.4+2'
+  build_runner:  '>=0.3.0'
+  yaml:  '>=2.1.12'
+  xml: '>=2.5.0'
+  code_builder: '>=0.1.0'
 
 dev_dependencies:
   resolver:
   test: '>=0.12.0 <0.13.0'
-  mockito:
+  mockito:  '1.0.1'

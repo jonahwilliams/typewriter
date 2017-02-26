@@ -22,7 +22,7 @@ class XmlSimpleAnalysis implements Analysis {
     final fields = <XmlElementDescription>[];
     for (final field in element.fields) {
       if (field.metadata.any(
-          (an) => an.constantValue.type.isAssignableTo(_typeProvider.ignore))) {
+          (an) => _typeProvider.isIgnore(an.constantValue.type))) {
         continue;
       }
       if (field.isFinal) {

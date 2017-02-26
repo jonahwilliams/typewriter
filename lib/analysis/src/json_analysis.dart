@@ -23,15 +23,14 @@ class JsonAnalysisSimple implements Analysis {
     final fields = <JsonFieldDescription>[];
     for (final field in element.fields) {
       if (field.metadata.any(
-          (an) => an.constantValue.type.isAssignableTo(_typeProvider.ignore))) {
+          (an) => _typeProvider.isIgnore(an.constantValue.type))) {
         continue;
       }
       if (field.isFinal) {
         throw new ClassFinalFieldException(element.displayName);
       }
       final keyAnnotation = field.metadata.firstWhere(
-          (annotation) => annotation.constantValue.type
-              .isAssignableTo(_typeProvider.jsonKey),
+          (annotation) => _typeProvider.isJsonKey(annotation.constantValue.type),
           orElse: () => null);
       final key =
           keyAnnotation?.constantValue?.getField('key')?.toStringValue();

@@ -11,9 +11,7 @@ import 'package:dart_style/src/dart_formatter.dart';
 
 final dartFormatter = new DartFormatter();
 
-
 AssetId _generatedFile(AssetId input) => input.changeExtension('.g.dart');
-
 
 class CodecBuilder implements Builder {
   Analysis _jsonSimple;
@@ -39,7 +37,7 @@ class CodecBuilder implements Builder {
     // TODO: refactor decision into separate class.
     for (final element in _getClassElements(library)) {
       final jsonAnnotation = element.metadata.firstWhere(
-              (an) => an.constantValue.type.isAssignableTo(_typeProvider.json),
+          (an) => _typeProvider.isJson(an.constantValue.type),
           orElse: () => null);
 //      final xmlAnnotation = element.metadata.firstWhere(
 //              (an) => an.constantValue.type.isAssignableTo(_typeProvider.xml),
@@ -48,7 +46,7 @@ class CodecBuilder implements Builder {
 //        final customCodec = jsonAnnotation.constantValue
 //            .getField('useCustomCodec')
 //            .toBoolValue();
-          codecs.add(_jsonSimple.analyze(element, _jsonRegistry));
+        codecs.add(_jsonSimple.analyze(element, _jsonRegistry));
       }
 //      if (xmlAnnotation != null) {
 //          codecs.add(_xmlSimple.analyze(element, _xmlRegistry));
@@ -59,17 +57,15 @@ class CodecBuilder implements Builder {
     contentBuffer.writeln("part of ${library.displayName};");
 
     for (final codec in codecs) {
-      contentBuffer.write(codec.buildEncoder(_jsonRegistry).buildClass().toSource());
+      contentBuffer
+          .write(codec.buildEncoder(_jsonRegistry).buildClass().toSource());
       //contentBuffer.write(codec.buildDecoder(_jsonRegistry).buildClass().toSource());
       //contentBuffer.write(codec.buildCodec(_jsonRegistry).buildClass().toSource());
     }
 
-
     final result = dartFormatter.format(contentBuffer.toString());
 
-
-    await step.writeAsString(
-        _generatedFile(step.inputId), result);
+    await step.writeAsString(_generatedFile(step.inputId), result);
   }
 
   @override
@@ -83,25 +79,20 @@ class CodecBuilder implements Builder {
 
   /// TODO: refactor to grab any class with library specific class annotation
   Iterable<ClassElement> _getClassElements(LibraryElement unit) {
-    final classes = unit.units.expand((unit) => unit.unit.declarations)
+    final classes = unit.units
+        .expand((unit) => unit.unit.declarations)
         .where((dec) => dec is ClassDeclaration)
         .map((dec) => (dec as ClassDeclaration).element)
-        .where((el) =>
-        el.metadata.any(
-            (an) =>
-                an.constantValue.type.isAssignableTo(_typeProvider.json)));
+        .where((el) => el.metadata
+            .any((an) => _typeProvider.isJson(an.constantValue.type)));
     final importedClasses = unit.importedLibraries
         .where((lib) => !lib.isDartCore && !lib.isInSdk)
         .expand((el) => el.units.expand((unit) => unit.unit.declarations))
         .where((dec) => dec is ClassDeclaration)
         .map((dec) => (dec as ClassDeclaration).element)
-        .where((el) =>
-        el.metadata.any(
-                (an) =>
-                an.constantValue.type.isAssignableTo(_typeProvider.json)));
+        .where((el) => el.metadata
+            .any((an) => _typeProvider.isJson(an.constantValue.type)));
 
-    return <ClassElement>[]
-        ..addAll(classes)
-        ..addAll(importedClasses);
+    return <ClassElement>[]..addAll(classes)..addAll(importedClasses);
   }
 }

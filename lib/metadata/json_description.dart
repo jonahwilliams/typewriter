@@ -110,4 +110,8 @@ class JsonFieldDescription {
       other.field == field &&
       other.repeated == repeated &&
       other.type == type;
+
+  @override
+  String toString()
+    => '<$key/$field repeated:$repeated type:${type.displayName}>';
 }
