@@ -4,22 +4,24 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
-import 'package:dart_style/src/dart_formatter.dart';
 import 'package:typewriter/analysis/analysis.dart';
-import 'package:typewriter/src/codec_builder.dart';
-import 'package:typewriter/src/metadata.dart';
+import 'package:typewriter/metadata/metadata.dart';
 import 'package:typewriter/src/system_type_provider.dart';
+import 'package:dart_style/src/dart_formatter.dart';
+
+final dartFormatter = new DartFormatter();
+
 
 AssetId _generatedFile(AssetId input) => input.changeExtension('.g.dart');
 
-///
+
 class CodecBuilder implements Builder {
   Analysis _jsonSimple;
-  Analysis _jsonCustom;
-  MetadataRegistry _registry;
+  Analysis _xmlSimple;
   SystemTypeProvider _typeProvider;
+  Map<DartType, Metadata> _jsonRegistry;
+  Map<DartType, Metadata> _xmlRegistry;
 
-  ///
   CodecBuilder();
 
   @override
@@ -32,81 +34,51 @@ class CodecBuilder implements Builder {
         resolver.getLibraryByName('typewriter.annotations'));
 
     final library = resolver.getLibrary(step.inputId);
+    final codecs = <BuildsCodec>[];
 
     // TODO: refactor decision into separate class.
     for (final element in _getClassElements(library)) {
       final jsonAnnotation = element.metadata.firstWhere(
               (an) => an.constantValue.type.isAssignableTo(_typeProvider.json),
           orElse: () => null);
+//      final xmlAnnotation = element.metadata.firstWhere(
+//              (an) => an.constantValue.type.isAssignableTo(_typeProvider.xml),
+//          orElse: () => null);
       if (jsonAnnotation != null) {
-        final customCodec = jsonAnnotation.constantValue
-            .getField('useCustomCodec')
-            .toBoolValue();
-        if (customCodec) {
-          _jsonCustom.analyze(element);
-        } else {
-          _jsonSimple.analyze(element);
-        }
+//        final customCodec = jsonAnnotation.constantValue
+//            .getField('useCustomCodec')
+//            .toBoolValue();
+          codecs.add(_jsonSimple.analyze(element, _jsonRegistry));
       }
-    }
-    final allErrors = []
-      ..addAll(_jsonCustom.errors)
-      ..addAll(_jsonSimple.errors);
-
-    if (allErrors.isNotEmpty) {
-      log.severe('Codec generation halted:');
-      allErrors.forEach(log.severe);
+//      if (xmlAnnotation != null) {
+//          codecs.add(_xmlSimple.analyze(element, _xmlRegistry));
+//      }
     }
 
     final contentBuffer = new StringBuffer();
     contentBuffer.writeln("part of ${library.displayName};");
-    contentBuffer.writeln('const jsonCodec = const JsonCodec();');
 
-    for (final metadata in _registry.compositeTypes) {
-      contentBuffer.write(_generate(metadata.element));
+    for (final codec in codecs) {
+      contentBuffer.write(codec.buildEncoder(_jsonRegistry).buildClass().toSource());
+      contentBuffer.write(codec.buildDecoder(_jsonRegistry).buildClass().toSource());
+      contentBuffer.write(codec.buildCodec(_jsonRegistry).buildClass().toSource());
     }
 
-    final result = contentBuffer.toString();
-    final formatter = new DartFormatter();
+
+    final result = dartFormatter.format(contentBuffer.toString());
+
 
     await step.writeAsString(
-        _generatedFile(step.inputId), formatter.format(result));
+        _generatedFile(step.inputId), result);
   }
 
   @override
   List<AssetId> declareOutputs(AssetId assetId) => [_generatedFile(assetId)];
 
-  // TODO: abstract this out/update metadata registry so that we can xml/json
-  String _generate(ClassElement element) {
-    final fields = (_registry.getType(element.type) as CompositeTypeMetadata)
-        .fields;
-    final builder = new JsonCodecBuilder(_registry, element.type);
-
-    for (final field in fields) {
-      String key = field.name;
-      for (final annotation in field.metadata) {
-        final value = annotation.constantValue;
-        if (value.type.isAssignableTo(_typeProvider.jsonKey)) {
-          key = annotation.constantValue.getField('key').toStringValue();
-        }
-      }
-      // Temp hack because type APIs did not work as I imagined.
-      if (field.type.displayName.contains('List')) {
-        final el = (field.type as ParameterizedType).typeArguments.first;
-        builder.addField(field.name, el, true, key);
-      } else {
-        builder.addField(field.name, field.type, false, key);
-      }
-    }
-
-    return builder.build();
-  }
-
   void _initialize(LibraryElement coreLib, LibraryElement typewriterLib) {
     _typeProvider = new SystemTypeProvider(typewriterLib);
-    _registry = new MetadataRegistry(coreLib);
-    _jsonSimple = new JsonAnalysisSimple(_typeProvider, _registry);
-    _jsonCustom = new JsonAnalysisCustom(_typeProvider, _registry);
+    _jsonRegistry = buildJsonRegistry(coreLib);
+    _jsonSimple = new JsonAnalysisSimple(_typeProvider);
   }
 
   /// TODO: refactor to grab any class with library specific class annotation

@@ -1,134 +1,181 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:code_builder/code_builder.dart';
 
+/// Builds an initial map of serialization information for xml
 ///
-class MetadataRegistry {
-  final Map<DartType, TypeMetadata> _metadata;
+/// Contains the information that lets typewriter know it has to call
+/// `int.parse` or `x.toIso8601String`.
+Map<DartType, Metadata> buildXmlRegistry(LibraryElement coreLibrary) {
+  final provider = coreLibrary.context.typeProvider;
+  final datetimeType = coreLibrary.getType('DateTime').type;
+  final regexpType = coreLibrary.getType('RegExp').type;
 
-  /// Builds a [MetadataRegistry] for encoding JSON data types.
-  factory MetadataRegistry.JSON(LibraryElement coreLibrary) {
-    final provider = coreLibrary.context.typeProvider;
-    final dateTimeType = coreLibrary.getType('DateTime').type;
-    final regexType = coreLibrary.getType('RegExp').type;
-    final symbolType = coreLibrary.getType('Symbol').type;
-    final metadata = <DartType, TypeMetadata>{
-      provider.boolType:
-          new ScalarTypeMetadata(provider.boolType, _identity, _identity),
-      provider.doubleType:
-          new ScalarTypeMetadata(provider.doubleType, _identity, _identity),
-      provider.intType:
-          new ScalarTypeMetadata(provider.intType, _identity, _identity),
-      provider.stringType:
-          new ScalarTypeMetadata(provider.stringType, _identity, _identity),
-      provider.nullType:
-          new ScalarTypeMetadata(provider.nullType, _identity, (x) => 'null'),
-      dateTimeType: new ScalarTypeMetadata(dateTimeType,
-          (x) => '$x.toIso8601String()', (x) => 'DateTime.parse($x)'),
-      regexType: new ScalarTypeMetadata(
-          regexType, (x) => '$x.pattern', (x) => 'new RegExp($x)'),
-      symbolType: new ScalarTypeMetadata(
-          symbolType, (x) => '$x.toString()', (x) => 'new Symbol($x)')
+  return {
+    provider.boolType: new Metadata.scalar('bool',
+        encoder: (arg) => arg.invoke('toString', const []),
+        decoder: (arg) => arg.equals(literal('true'))),
+    provider.stringType: new Metadata.scalar('String',
+        encoder: (arg) => arg, decoder: (arg) => arg),
+    provider.intType: new Metadata.scalar('int',
+        encoder: (arg) => arg.invoke('toString', const []),
+        decoder: (arg) => reference('int').invoke('parse', [arg, literal(10)])),
+    provider.doubleType: new Metadata.scalar('double',
+        encoder: (arg) => arg.invoke('toString', const []),
+        decoder: (arg) =>
+            reference('double').invoke('parse', [arg, literal(10)])),
+    provider.symbolType: new Metadata.scalar('Symbol',
+        encoder: (arg) => arg.invoke('toString', const []),
+        decoder: (arg) => reference('Symbol').newInstance([arg])),
+    provider.nullType: new Metadata.scalar('Null',
+        encoder: (arg) => literal('null'), decoder: (arg) => literal(null)),
+    regexpType: new Metadata.scalar('RegExp',
+        encoder: (arg) => arg.invoke('toString', const []),
+        decoder: (arg) => reference('RegExp').newInstance([arg])),
+    datetimeType: new Metadata.scalar('DateTime',
+        encoder: (arg) => arg.invoke('toIso8601String', const []),
+        decoder: (arg) => reference('DateTime').invoke('parse', [arg])),
+  };
+}
+
+/// Builds an initial map of serialization information for json
+///
+/// Contains the information that lets typewriter know it has to call
+/// `int.parse` or `x.toIso8601String`.
+Map<DartType, Metadata> buildJsonRegistry(LibraryElement coreLibrary) {
+  final provider = coreLibrary.context.typeProvider;
+  final datetimeType = coreLibrary.getType('DateTime').type;
+  final regexpType = coreLibrary.getType('RegExp').type;
+
+  return {
+    provider.boolType: new Metadata.scalar('bool',
+        encoder: (arg) => arg, decoder: (arg) => arg),
+    provider.stringType: new Metadata.scalar('String',
+        encoder: (arg) => arg, decoder: (arg) => arg),
+    provider.intType: new Metadata.scalar('int',
+        encoder: (arg) => arg, decoder: (arg) => arg),
+    provider.doubleType: new Metadata.scalar('double',
+        encoder: (arg) => arg, decoder: (arg) => arg),
+    provider.symbolType: new Metadata.scalar('Symbol',
+        encoder: (arg) => arg.invoke('toString', const []),
+        decoder: (arg) => reference('Symbol').newInstance([arg])),
+    provider.nullType: new Metadata.scalar('Null',
+        encoder: (arg) => literal('null'), decoder: (arg) => literal(null)),
+    regexpType: new Metadata.scalar('RegExp',
+        encoder: (arg) => arg.invoke('toString', const []),
+        decoder: (arg) => reference('RegExp').newInstance([arg])),
+    datetimeType: new Metadata.scalar('DateTime',
+        encoder: (arg) => arg.invoke('toIso8601String', const []),
+        decoder: (arg) => reference('DateTime').invoke('parse', [arg])),
+  };
+}
+
+/// Metadata carries encode and decode expressions.
+///
+/// It is used to nest converters in each other and handle platform specific
+/// serialization logic.
+class Metadata {
+  final String name;
+  final ExpressionBuilderBuilder encoder;
+  final ExpressionBuilderBuilder decoder;
+
+  /// Creates metadata for a type like String or int which represents a singular
+  /// value.
+  factory Metadata.scalar(String name,
+      {ExpressionBuilderBuilder encoder, ExpressionBuilderBuilder decoder}) {
+    return new Metadata._(name, encoder, decoder);
+  }
+
+  /// Creates metadata for a class which is composed of several fields.
+  factory Metadata.composite(String name) {
+    final encoder = (ExpressionBuilder arg) {
+      return reference('_${name}Encoder')
+          .newInstance(const []).invoke('convert', [arg]);
     };
-    return new MetadataRegistry._(metadata);
+    final decoder = (ExpressionBuilder arg) {
+      return reference('_${name}Decoder')
+          .newInstance(const []).invoke('convert', [arg]);
+    };
+    return new Metadata._(name, encoder, decoder);
   }
 
-  /// Builds a [MetadataRegistry] for encoding XML data types.
-  factory MetadataRegistry.XML(LibraryElement coreLibrary) {
-    final provider = coreLibrary.context.typeProvider;
-    final dateTimeType = coreLibrary.getType('DateTime').type;
-    final regexType = coreLibrary.getType('RegExp').type;
-    final symbolType = coreLibrary.getType('Symbol').type;
-
-    return new MetadataRegistry._(<DartType, TypeMetadata>{
-      provider.boolType: new ScalarTypeMetadata(
-          provider.boolType, _identity, (x) => '$x == true'),
-      provider.doubleType: new ScalarTypeMetadata(
-          provider.doubleType, _identity, (x) => 'double.parse($x, 10)'),
-      provider.intType: new ScalarTypeMetadata(
-          provider.intType, _identity, (x) => 'int.parse($x, 10)'),
-      provider.stringType:
-          new ScalarTypeMetadata(provider.stringType, _identity, _identity),
-      provider.nullType:
-          new ScalarTypeMetadata(provider.nullType, _identity, (x) => 'null'),
-      dateTimeType: new ScalarTypeMetadata(dateTimeType,
-          (x) => '$x.toIso8601String()', (x) => 'DateTime.parse($x)'),
-      regexType: new ScalarTypeMetadata(
-          regexType, (x) => '$x.pattern', (x) => 'new RegExp($x)'),
-      symbolType: new ScalarTypeMetadata(
-          symbolType, (x) => '$x.toString()', (x) => 'new Symbol($x)')
-    });
-  }
-
-  MetadataRegistry._(this._metadata);
-
-  /// Returns all of the [CompositeTypeMetadata] in the registry.
-  Iterable<CompositeTypeMetadata> get compositeTypes =>
-      _metadata.values.where((data) => data is CompositeTypeMetadata);
-
-  /// Returns all of the [ScalarTypeMetadata] in the registry.
-  Iterable<ScalarTypeMetadata> get scalarTypes =>
-      _metadata.values.where((data) => data is ScalarTypeMetadata);
-
-  /// Adds a [type] with [metadata] to the registry.
-  void addType(DartType type, TypeMetadata metadata) {
-    _metadata[type] = metadata;
-  }
-
-  /// retrieves the [TypeMetadata] associated with [type], or null.
-  TypeMetadata getType(DartType type) => _metadata[type];
-
-  static String _identity(String input) => input;
+  const Metadata._(this.name, this.encoder, this.decoder);
 }
 
-///
-class ScalarTypeMetadata implements TypeMetadata {
-  ///
-  final Writer encodeString;
+abstract class BuildsCodec {
+  ClassBuilder buildCodec(Map<DartType, Metadata> registry);
 
-  ///
-  final Writer decodeString;
-  final DartType _type;
+  ClassBuilder buildDecoder(Map<DartType, Metadata> registry);
 
-  ///
-  const ScalarTypeMetadata(this._type, this.encodeString, this.decodeString);
-
-  ///
-  @override
-  String get displayName => _type.displayName;
+  ClassBuilder buildEncoder(Map<DartType, Metadata> registry);
 }
 
+typedef ExpressionBuilder ExpressionBuilderBuilder(ExpressionBuilder arg);
 
-///
-typedef String Writer(String input);
+class JsonDescription implements BuildsCodec {
+  static final _jsonType = reference('Object');
 
-///
-class CompositeTypeMetadata implements TypeMetadata {
-  ///
-  final ClassElement element;
-  final List<FieldElement> fields;
-  final DartType _type;
-
-  ///
-  const CompositeTypeMetadata(this._type, this.element, this.fields);
-
-  @override
-  String get displayName => _type.displayName;
-}
-
-///
-abstract class TypeMetadata {
-  ///
-  String get displayName;
-}
-
-
-
-////
-
-class JsonDescription {
+  final String name;
   final List<JsonFieldDescription> fields;
 
-  const JsonDescription(this.fields);
+  const JsonDescription(this.name, this.fields);
+
+  @override
+  ClassBuilder buildEncoder(Map<DartType, Metadata> registry) {
+    final type = new TypeBuilder(name);
+
+    return new ClassBuilder('_${name}Encoder',
+        asExtends:
+            new TypeBuilder('Converter', genericTypes: [type, _jsonType]))
+      ..addConstructor(new ConstructorBuilder())
+      ..addMethod(new MethodBuilder('convert', returnType: _jsonType)
+        ..addPositional(new ParameterBuilder('input', type: type))
+        ..addStatement(map({},
+                keyType: new TypeBuilder('String'),
+                valueType: new TypeBuilder('dynamic'))
+            .asVar('output'))
+        ..addStatements(fields.map((field) => field.buildEncoder(registry)))
+        ..addStatement(reference('output').asReturn()));
+  }
+
+  @override
+  ClassBuilder buildDecoder(Map<DartType, Metadata> registry) {
+    final type = new TypeBuilder(name);
+
+    return new ClassBuilder('_${name}Decoder',
+        asExtends:
+            new TypeBuilder('Converter', genericTypes: [_jsonType, type]))
+      ..addConstructor(new ConstructorBuilder())
+      ..addMethod(new MethodBuilder('convert', returnType: type)
+        ..addPositional(new ParameterBuilder('rawInput', type: _jsonType))
+        ..addStatement(reference('rawInput')
+            .castAs(new TypeBuilder('Map', genericTypes: [
+              new TypeBuilder('String'),
+              new TypeBuilder('dynamic')
+            ]))
+            .asVar('input'))
+        ..addStatement(reference(name).newInstance([]).asVar('output'))
+        ..addStatements(fields.map((field) => field.buildDecoder(registry)))
+        ..addStatement(reference('output').asReturn()));
+  }
+
+  @override
+  ClassBuilder buildCodec(Map<DartType, Metadata> registry) {
+    final type = new TypeBuilder(name);
+
+    return new ClassBuilder('${name}Codec',
+        asExtends: new TypeBuilder('Codec',
+            genericTypes: [_jsonType, type], importFrom: 'dart:convert'))
+      ..addConstructor(new ConstructorBuilder())
+      ..addMethod(new MethodBuilder.getter('encoder',
+          returns: reference('_${name}Encoder').newInstance(const []),
+          returnType:
+              new TypeBuilder('Converter', genericTypes: [type, _jsonType])))
+      ..addMethod(new MethodBuilder.getter('decoder',
+          returns: reference('_${name}Decoder').newInstance(const []),
+          returnType:
+              new TypeBuilder('Converter', genericTypes: [_jsonType, type])));
+  }
 }
 
 class JsonFieldDescription {
@@ -138,16 +185,122 @@ class JsonFieldDescription {
   final DartType type;
 
   const JsonFieldDescription(this.key, this.field, this.repeated, this.type);
+
+  StatementBuilder buildEncoder(Map<DartType, Metadata> registry) {
+    if (repeated) {
+      final encoder = registry[type].encoder;
+      final converter = new MethodBuilder.closure(returns: encoder(reference('x')))
+        ..addPositional(new ParameterBuilder('x'));
+
+      return reference('input').property(field)
+          .invoke('map', [converter])
+          .invoke('toList', const [])
+          .asAssign(reference('output')[literal(key)]);
+    }
+
+    final encode = registry[type].encoder(reference('input').property(field));
+    return encode.asAssign(reference('output')[literal(key)]);
+  }
+
+  StatementBuilder buildDecoder(Map<DartType, Metadata> registry) {
+    final decode = registry[type].decoder(reference('input')[literal(key)]);
+    return decode.asAssign(reference('output').property(field));
+  }
 }
+///////
 
+class XmlDescription implements BuildsCodec {
+  static final _xmlType =
+      new TypeBuilder('XmlNode', importFrom: 'package:xml/xml.dart');
+  static final _builder = reference('builder');
+  static final _output = reference('output');
 
-class XmlDescription {
-  final List<XmlElementDescripton> elements;
+  final String name;
+  final String key;
+  final List<XmlElementDescription> elements;
+  final List<XmlAttributeDescription> attributes;
 
-  const XmlDescription(this.elements);
+  const XmlDescription(this.name, this.key, this.elements,
+      [this.attributes = const []]);
+
+  @override
+  ClassBuilder buildEncoder(Map<DartType, Metadata> registry) {
+    final topLevelNest = new MethodBuilder.closure();
+    final type = new TypeBuilder(name);
+
+    for (final element in elements) {
+      topLevelNest.addStatement(element.buildEncoder(registry));
+    }
+    for (final attribute in attributes) {
+      topLevelNest.addStatement(_builder
+          .invoke('attribute', [literal(attribute.key), literal('bar')]));
+    }
+
+    return new ClassBuilder('_${name}Encoder',
+        asExtends: new TypeBuilder('Converter',
+            genericTypes: [
+              type,
+              _xmlType,
+            ],
+            importFrom: 'package:convert'))
+      ..addConstructor(new ConstructorBuilder())
+      ..addMethod(new MethodBuilder('convert', returnType: _xmlType)
+        ..addPositional(new ParameterBuilder('input', type: type))
+        ..addStatement(
+            reference('XmlBuilder').newInstance(const []).asVar('builder'))
+        ..addStatement(_builder.invoke('element', [literal(key)],
+            namedArguments: {'nest': topLevelNest}))
+        ..addStatement(_builder.invoke('build', const []).asReturn()));
+  }
+
+  @override
+  ClassBuilder buildDecoder(Map<DartType, Metadata> registry) {
+    final topLevelStatements = <StatementBuilder>[];
+    final type = new TypeBuilder(name);
+
+    for (final element in elements) {
+      topLevelStatements.add(element.buildDecoder(registry));
+    }
+
+    return new ClassBuilder('_${name}Decoder',
+        asExtends: new TypeBuilder('Converter',
+            genericTypes: [
+              _xmlType,
+              type,
+            ],
+            importFrom: 'dart:convert'))
+      ..addConstructor(new ConstructorBuilder())
+      ..addMethod(new MethodBuilder('convert', returnType: type)
+        ..addPositional(new ParameterBuilder('input', type: _xmlType))
+        ..addStatement(reference(name).newInstance(const []).asVar('output'))
+        ..addStatements(topLevelStatements)
+        ..addStatement(_output.asReturn()));
+  }
+
+  @override
+  ClassBuilder buildCodec(Map<DartType, Metadata> registry) {
+    final type = new TypeBuilder(name);
+
+    return new ClassBuilder('${name}Codec',
+        asExtends: new TypeBuilder('Codec',
+            genericTypes: [_xmlType, type], importFrom: 'dart:convert'))
+      ..addConstructor(new ConstructorBuilder())
+      ..addMethod(new MethodBuilder.getter('encoder',
+          returns: reference('_${name}Encoder').newInstance(const []),
+          returnType:
+              new TypeBuilder('Converter', genericTypes: [type, _xmlType])))
+      ..addMethod(new MethodBuilder.getter('decoder',
+          returns: reference('_${name}Decoder').newInstance(const []),
+          returnType:
+              new TypeBuilder('Converter', genericTypes: [_xmlType, type])));
+  }
 }
 
 class XmlElementDescription {
+  static final _builder = reference('builder');
+  static final _output = reference('output');
+  static final _input = reference('input');
+
   final String key;
   final String field;
   final bool repeated;
@@ -155,11 +308,45 @@ class XmlElementDescription {
   final DartType type;
   final List<XmlAttributeDescription> attributes;
 
-  const XmlElementDescription(this.key, this.field, this.repeated, this.type, this.attributes, [this.repeatedKey = 'item']);
+  const XmlElementDescription(
+      this.key, this.field, this.repeated, this.type, this.attributes,
+      [this.repeatedKey = 'item']);
+
+  StatementBuilder buildEncoder(Map<DartType, Metadata> registry) {
+    final encode = registry[type].encoder(_input.property(field));
+
+    return _builder.invoke(
+        'element',
+        [
+          literal(key),
+          encode,
+        ],
+        namedArguments: attributes.isEmpty
+            ? const {}
+            : {
+                'nest': new MethodBuilder.closure()
+                  ..addStatements(
+                      attributes.map((x) => x.buildEncoder(registry)))
+              });
+  }
+
+  StatementBuilder buildDecoder(Map<DartType, Metadata> registry) {
+    final decode = registry[type].decoder(reference('input')
+        .invoke('findElements', [literal(key)]).property('first'));
+
+    return decode.asAssign(_output.property(field));
+  }
 }
 
 class XmlAttributeDescription {
+  static final _builder = reference('builder');
   final String key;
+  final DartType type;
   final String value;
-  
+
+  const XmlAttributeDescription(this.key, this.value, this.type);
+
+  ExpressionBuilder buildEncoder(Map<DartType, Metadata> registry) {
+    return _builder.invoke('attribute', [literal(key), literal(value)]);
+  }
 }

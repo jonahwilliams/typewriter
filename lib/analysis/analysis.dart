@@ -1,7 +1,8 @@
 library typewriter.analysis;
 
 import 'package:analyzer/dart/element/element.dart';
-import 'package:typewriter/src/metadata.dart';
+import 'package:analyzer/dart/element/type.dart';
+import 'package:typewriter/metadata/metadata.dart';
 import 'package:typewriter/exceptions/exceptions.dart';
 import 'package:typewriter/src/system_type_provider.dart';
 
@@ -10,14 +11,9 @@ part 'src/xml_analysis.dart';
 
 /// Performs analysis on a [ClassElement] to determine if a valid codec can
 /// be constructed.
-///
-/// Exceptions are stored as data.
-/// Saves type information in the [MetadataRegistry].
 abstract class Analysis {
 
   /// Analyzes the [ClassElement] to determine if.
-  void analyze(ClassElement element);
+  BuildsCodec analyze(ClassElement element, Map<DartType, Metadata> registry);
 
-  /// Returns the errors generated during class analysis.
-  List<Exception> get errors;
 }
