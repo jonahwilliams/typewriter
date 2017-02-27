@@ -96,7 +96,7 @@ void main() {
       ]);
       final codec =
           prettyToSource(description.buildCodec(registry).buildClass());
-      final expected = 'class PeopleCodec extends Codec<Object, People> {\n'
+      final expected = 'class PeopleCodec extends Codec<People, Object> {\n'
           '  PeopleCodec();\n'
           '\n'
           '  Converter<People, Object> get encoder => new _PeopleEncoder();\n'

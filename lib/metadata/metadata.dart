@@ -30,7 +30,7 @@ Map<DartType, Metadata> buildXmlRegistry(LibraryElement coreLibrary) {
         encoder: (arg) => arg, decoder: (arg) => arg),
     provider.intType: new Metadata.scalar('int',
         encoder: (arg) => arg.invoke('toString', const []),
-        decoder: (arg) => reference('int').invoke('parse', [arg, literal(10)])),
+        decoder: (arg) => reference('int').invoke('parse', [arg])),
     provider.doubleType: new Metadata.scalar('double',
         encoder: (arg) => arg.invoke('toString', const []),
         decoder: (arg) =>

@@ -1,25 +1,59 @@
 library typewriter.annotations;
 
-part 'src/json_annotations.dart';
-part 'src/xml_annotations.dart';
-
-/// Basic information that can be provided on a field or constructor argument.
-abstract class DataAnnotation {
-  ///
-  String get key;
+class Ignore {
+  const Ignore();
 }
 
-/// Basic information that can be added onto a class/
-abstract class ClassAnnotation {}
+/// Allows renaming of the JSON key associated with a field.
+class PropertyJson {
+  final String key;
 
-/// An override for a factory function which replaces the default decoder.
-abstract class DecodeAnnotation {}
+  /// Creates a [JsonKey] annotation.
+  const PropertyJson(this.key);
+}
 
-/// An override for a method which replaces the default encoder.
-abstract class EncodeAnnotation {}
+///
+class Json {
+  /// TODO: think of better name
+  final bool useCustom;
 
-/// Ignores the field when generating codecs.
-class Ignore {
   ///
-  const Ignore();
+  const Json({this.useCustom: false});
+}
+
+///
+class EncodeJson {
+  ///
+  const EncodeJson();
+}
+
+///
+class DecodeJson {
+  ///
+  const DecodeJson();
+}
+
+///
+class ElementXml {
+  final String key;
+
+  ///
+  const ElementXml(this.key);
+}
+
+///
+class AttributeXml {
+  ///
+  final String element;
+
+  final String key;
+
+  ///
+  const AttributeXml(this.key, this.element);
+}
+
+///
+class Xml {
+  ///
+  const Xml();
 }

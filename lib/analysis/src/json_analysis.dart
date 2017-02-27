@@ -1,11 +1,11 @@
 part of typewriter.analysis;
 
 /// Performs an analysis where the source class only contains public fields.
-class JsonAnalysisSimple implements Analysis {
+class AnalysisJsonSimple implements Analysis {
   final SystemTypeProvider _typeProvider;
 
   /// Creates a simple analysis instance.
-  JsonAnalysisSimple(this._typeProvider);
+  AnalysisJsonSimple(this._typeProvider);
 
   @override
   BuildsCodec analyze(ClassElement element, Map<DartType, Metadata> registry) {
@@ -31,7 +31,7 @@ class JsonAnalysisSimple implements Analysis {
       }
       final keyAnnotation = field.metadata.firstWhere(
           (annotation) =>
-              _typeProvider.isJsonKey(annotation.constantValue.type),
+              _typeProvider.isPropertyJson(annotation.constantValue.type),
           orElse: () => null);
       final key =
           keyAnnotation?.constantValue?.getField('key')?.toStringValue();

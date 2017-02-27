@@ -78,7 +78,7 @@ class XmlDescription implements BuildsCodec {
 
     return new ClassBuilder('${name}Codec',
         asExtends: new TypeBuilder('Codec',
-            genericTypes: [_xmlType, type], importFrom: 'dart:convert'))
+            genericTypes: [type, _xmlType], importFrom: 'dart:convert'))
       ..addConstructor(new ConstructorBuilder())
       ..addMethod(new MethodBuilder.getter('encoder',
           returns: reference('_${name}Encoder').newInstance(const []),
@@ -110,24 +110,20 @@ class XmlElementDescription {
   StatementBuilder buildEncoder(Map<DartType, Metadata> registry) {
     final encode = registry[type].encoder(_input.property(field));
 
-    return _builder.invoke(
-        'element',
-        [
-          literal(key),
-          encode,
-        ],
-        namedArguments: attributes.isEmpty
-            ? const {}
-            : {
-                'nest': new MethodBuilder.closure()
-                  ..addStatements(
-                      attributes.map((x) => x.buildEncoder(registry)))
-              });
+    return _builder.invoke('element', [
+      literal(key),
+    ], namedArguments: {
+      'nest': new MethodBuilder.closure()
+        ..addStatement(_builder.invoke('text', [encode]))
+        ..addStatements(attributes.map((x) => x.buildEncoder(registry)))
+    });
   }
 
   StatementBuilder buildDecoder(Map<DartType, Metadata> registry) {
     final decode = registry[type].decoder(reference('input')
-        .invoke('findElements', [literal(key)]).property('first'));
+        .invoke('findElements', [literal(key)])
+        .property('first')
+        .property('text'));
 
     return decode.asAssign(_output.property(field));
   }

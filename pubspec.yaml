@@ -14,7 +14,7 @@ dependencies:
   build_runner:  '0.3.0'
   yaml:  '2.1.12'
   xml: '2.5.0'
-  code_builder: '0.1.0'
+  code_builder: '1.0.0-beta+3'
   dart_style: '0.2.16'
 
 dev_dependencies:

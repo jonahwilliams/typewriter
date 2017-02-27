@@ -28,7 +28,7 @@ void main() {
       element = library.getType(name);
       provider = element.context.typeProvider;
       systemProvider = new MockSystemTypeProvider();
-      analysis = new JsonAnalysisSimple(systemProvider);
+      analysis = new AnalysisJsonSimple(systemProvider);
     }
 
     Future<Null> loadSource(String source, String name) async {
@@ -37,7 +37,7 @@ void main() {
 
       provider = element.context.typeProvider;
       systemProvider = new MockSystemTypeProvider();
-      analysis = new JsonAnalysisSimple(systemProvider);
+      analysis = new AnalysisJsonSimple(systemProvider);
     }
 
     test('class with only public fields', () async {
@@ -152,7 +152,7 @@ class MockSystemTypeProvider extends Mock implements SystemTypeProvider {
   bool isIgnore(DartType type) => type.displayName == 'Ignore';
 
   @override
-  bool isJsonKey(DartType type) => type.displayName == 'JsonKey';
+  bool isPropertyJson(DartType type) => type.displayName == 'JsonKey';
 }
 
 class MockType extends Mock implements DartType {}

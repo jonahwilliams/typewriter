@@ -58,7 +58,7 @@ class JsonDescription implements BuildsCodec {
 
     return new ClassBuilder('${name}Codec',
         asExtends: new TypeBuilder('Codec',
-            genericTypes: [_jsonType, type], importFrom: 'dart:convert'))
+            genericTypes: [type, _jsonType], importFrom: 'dart:convert'))
       ..addConstructor(new ConstructorBuilder())
       ..addMethod(new MethodBuilder.getter('encoder',
           returns: reference('_${name}Encoder').newInstance(const []),
