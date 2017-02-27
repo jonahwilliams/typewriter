@@ -27,10 +27,10 @@ void main() {
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
       final expected =
-          'class _PeopleEncoder extends Converter<People, XmlNode> {\n'
+          'class _PeopleEncoder extends Converter<People, XmlElement> {\n'
           '  _PeopleEncoder();\n'
           '\n'
-          '  XmlNode convert(People input) {\n'
+          '  XmlElement convert(People input) {\n'
           '    var builder = new XmlBuilder();\n'
           '    builder.element(\'People\', nest: () {\n'
           '      builder.element(\'name\', nest: () {\n'
@@ -53,10 +53,10 @@ void main() {
       final decoder =
           prettyToSource(description.buildDecoder(registry).buildClass());
       final expected =
-          'class _PeopleDecoder extends Converter<XmlNode, People> {\n'
+          'class _PeopleDecoder extends Converter<XmlElement, People> {\n'
           '  _PeopleDecoder();\n'
           '\n'
-          '  People convert(XmlNode input) {\n'
+          '  People convert(XmlElement input) {\n'
           '    var output = new People();\n'
           '    output.name = input.findElements(\'name\').first.text;\n'
           '    output.id = int.parse(input.findElements(\'id\').first.text);\n'
@@ -72,12 +72,12 @@ void main() {
     test('creates a class which exposes the encoder and decoder', () {
       final codec =
           prettyToSource(description.buildCodec(registry).buildClass());
-      final expected = 'class PeopleCodec extends Codec<People, XmlNode> {\n'
+      final expected = 'class PeopleCodec extends Codec<People, XmlElement> {\n'
           '  PeopleCodec();\n'
           '\n'
-          '  Converter<People, XmlNode> get encoder => new _PeopleEncoder();\n'
+          '  Converter<People, XmlElement> get encoder => new _PeopleEncoder();\n'
           '\n'
-          '  Converter<XmlNode, People> get decoder => new _PeopleDecoder();\n'
+          '  Converter<XmlElement, People> get decoder => new _PeopleDecoder();\n'
           '}\n';
 
       expect(codec, expected);

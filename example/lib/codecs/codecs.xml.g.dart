@@ -26,7 +26,11 @@ class _ItemEncoder extends Converter<Item, XmlNode> {
 class _ItemDecoder extends Converter<XmlNode, Item> {
   _ItemDecoder();
 
-  Item convert(XmlNode input) {
+  Item convert(XmlNode inputRaw) {
+    var input = inputRaw as XmlElement;
+    if (input.name.value != 'Item') {
+      throw new Exception("");
+    }
     var output = new Item();
     output.name = input.findElements('name').first.text;
     output.id = int.parse(input.findElements('id').first.text);

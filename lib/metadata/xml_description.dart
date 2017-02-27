@@ -6,7 +6,7 @@ import 'metadata.dart';
 
 class XmlDescription implements BuildsCodec {
   static final _xmlType =
-      new TypeBuilder('XmlNode', importFrom: 'package:xml/xml.dart');
+      new TypeBuilder('XmlElement', importFrom: 'package:xml/xml.dart');
   static final _builder = reference('builder');
   static final _output = reference('output');
 
