@@ -14,7 +14,7 @@ void main() {
         encoder: (arg) => arg, decoder: (arg) => arg),
     intType: new Metadata.scalar('int',
         encoder: (arg) => arg.invoke('toString', const []),
-        decoder: (arg) => reference('int').invoke('parse', [arg, literal(10)]))
+        decoder: (arg) => reference('int').invoke('parse', [arg])),
   };
 
   final description = new XmlDescription('People', 'People', [
@@ -33,8 +33,12 @@ void main() {
           '  XmlNode convert(People input) {\n'
           '    var builder = new XmlBuilder();\n'
           '    builder.element(\'People\', nest: () {\n'
-          '      builder.element(\'name\', input.name);\n'
-          '      builder.element(\'id\', input.id.toString());\n'
+          '      builder.element(\'name\', nest: () {\n'
+          '        builder.text(input.name);\n'
+          '      });\n'
+          '      builder.element(\'id\', nest: () {\n'
+          '        builder.text(input.id.toString());\n'
+          '      });\n'
           '    });\n'
           '    return builder.build();\n'
           '  }\n'
@@ -54,8 +58,8 @@ void main() {
           '\n'
           '  People convert(XmlNode input) {\n'
           '    var output = new People();\n'
-          '    output.name = input.findElements(\'name\').first;\n'
-          '    output.id = int.parse(input.findElements(\'id\').first, 10);\n'
+          '    output.name = input.findElements(\'name\').first.text;\n'
+          '    output.id = int.parse(input.findElements(\'id\').first.text);\n'
           '    return output;\n'
           '  }\n'
           '}\n';
@@ -68,7 +72,7 @@ void main() {
     test('creates a class which exposes the encoder and decoder', () {
       final codec =
           prettyToSource(description.buildCodec(registry).buildClass());
-      final expected = 'class PeopleCodec extends Codec<XmlNode, People> {\n'
+      final expected = 'class PeopleCodec extends Codec<People, XmlNode> {\n'
           '  PeopleCodec();\n'
           '\n'
           '  Converter<People, XmlNode> get encoder => new _PeopleEncoder();\n'
