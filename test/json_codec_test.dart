@@ -25,10 +25,10 @@ void main() {
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
       final expected =
-          'class _PeopleEncoder extends Converter<People, Object> {\n'
+          'class _PeopleEncoder extends Converter<People, Map<String, dynamic>> {\n'
           '  _PeopleEncoder();\n'
           '\n'
-          '  Object convert(People input) {\n'
+          '  Map<String, dynamic> convert(People input) {\n'
           '    var output = <String, dynamic>{};\n'
           '    output[\'name\'] = input.name;\n'
           '    output[\'id\'] = input.id;\n'
@@ -47,10 +47,10 @@ void main() {
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
       final expected =
-          'class _PeopleEncoder extends Converter<People, Object> {\n'
+          'class _PeopleEncoder extends Converter<People, Map<String, dynamic>> {\n'
           '  _PeopleEncoder();\n'
           '\n'
-          '  Object convert(People input) {\n'
+          '  Map<String, dynamic> convert(People input) {\n'
           '    var output = <String, dynamic>{};\n'
           '    output[\'name\'] = input.name;\n'
           '    output[\'values\'] = input.values.map((x) => x).toList();\n'
@@ -72,11 +72,10 @@ void main() {
       final decoder =
           prettyToSource(description.buildDecoder(registry).buildClass());
       final expected =
-          'class _PeopleDecoder extends Converter<Object, People> {\n'
+          'class _PeopleDecoder extends Converter<Map<String, dynamic>, People> {\n'
           '  _PeopleDecoder();\n'
           '\n'
-          '  People convert(Object rawInput) {\n'
-          '    var input = rawInput as Map<String, dynamic>;\n'
+          '  People convert(Map<String, dynamic> input) {\n'
           '    var output = new People();\n'
           '    output.name = input[\'name\'];\n'
           '    output.id = input[\'id\'];\n'
@@ -96,12 +95,13 @@ void main() {
       ]);
       final codec =
           prettyToSource(description.buildCodec(registry).buildClass());
-      final expected = 'class PeopleCodec extends Codec<People, Object> {\n'
+      final expected =
+          'class PeopleCodec extends Codec<People, Map<String, dynamic>> {\n'
           '  PeopleCodec();\n'
           '\n'
-          '  Converter<People, Object> get encoder => new _PeopleEncoder();\n'
+          '  Converter<People, Map<String, dynamic>> get encoder => new _PeopleEncoder();\n'
           '\n'
-          '  Converter<Object, People> get decoder => new _PeopleDecoder();\n'
+          '  Converter<Map<String, dynamic>, People> get decoder => new _PeopleDecoder();\n'
           '}\n';
 
       expect(codec, expected);

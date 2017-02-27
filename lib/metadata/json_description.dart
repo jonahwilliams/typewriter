@@ -6,8 +6,6 @@ import 'metadata.dart';
 
 /// A description and builder for JSON codecs.
 class JsonDescription implements BuildsCodec {
-  static final _jsonType = reference('Object');
-
   final String name;
   final List<JsonFieldDescription> fields;
 
@@ -16,12 +14,16 @@ class JsonDescription implements BuildsCodec {
   @override
   ClassBuilder buildEncoder(Map<DartType, Metadata> registry) {
     final type = new TypeBuilder(name);
+    final jsonType = new TypeBuilder('Map',
+        genericTypes: [new TypeBuilder('String'), new TypeBuilder('dynamic')]);
 
     return new ClassBuilder('_${name}Encoder',
-        asExtends:
-            new TypeBuilder('Converter', genericTypes: [type, _jsonType]))
+        asExtends: new TypeBuilder('Converter', genericTypes: [
+          type,
+          jsonType,
+        ]))
       ..addConstructor(new ConstructorBuilder())
-      ..addMethod(new MethodBuilder('convert', returnType: _jsonType)
+      ..addMethod(new MethodBuilder('convert', returnType: jsonType)
         ..addPositional(new ParameterBuilder('input', type: type))
         ..addStatement(map({},
                 keyType: new TypeBuilder('String'),
@@ -34,19 +36,14 @@ class JsonDescription implements BuildsCodec {
   @override
   ClassBuilder buildDecoder(Map<DartType, Metadata> registry) {
     final type = new TypeBuilder(name);
+    final jsonType = new TypeBuilder('Map',
+        genericTypes: [new TypeBuilder('String'), new TypeBuilder('dynamic')]);
 
     return new ClassBuilder('_${name}Decoder',
-        asExtends:
-            new TypeBuilder('Converter', genericTypes: [_jsonType, type]))
+        asExtends: new TypeBuilder('Converter', genericTypes: [jsonType, type]))
       ..addConstructor(new ConstructorBuilder())
       ..addMethod(new MethodBuilder('convert', returnType: type)
-        ..addPositional(new ParameterBuilder('rawInput', type: _jsonType))
-        ..addStatement(reference('rawInput')
-            .castAs(new TypeBuilder('Map', genericTypes: [
-              new TypeBuilder('String'),
-              new TypeBuilder('dynamic')
-            ]))
-            .asVar('input'))
+        ..addPositional(new ParameterBuilder('input', type: jsonType))
         ..addStatement(reference(name).newInstance([]).asVar('output'))
         ..addStatements(fields.map((field) => field.buildDecoder(registry)))
         ..addStatement(reference('output').asReturn()));
@@ -55,19 +52,21 @@ class JsonDescription implements BuildsCodec {
   @override
   ClassBuilder buildCodec(Map<DartType, Metadata> registry) {
     final type = new TypeBuilder(name);
+    final jsonType = new TypeBuilder('Map',
+        genericTypes: [new TypeBuilder('String'), new TypeBuilder('dynamic')]);
 
     return new ClassBuilder('${name}Codec',
         asExtends: new TypeBuilder('Codec',
-            genericTypes: [type, _jsonType], importFrom: 'dart:convert'))
+            genericTypes: [type, jsonType], importFrom: 'dart:convert'))
       ..addConstructor(new ConstructorBuilder())
       ..addMethod(new MethodBuilder.getter('encoder',
           returns: reference('_${name}Encoder').newInstance(const []),
           returnType:
-              new TypeBuilder('Converter', genericTypes: [type, _jsonType])))
+              new TypeBuilder('Converter', genericTypes: [type, jsonType])))
       ..addMethod(new MethodBuilder.getter('decoder',
           returns: reference('_${name}Decoder').newInstance(const []),
           returnType:
-              new TypeBuilder('Converter', genericTypes: [_jsonType, type])));
+              new TypeBuilder('Converter', genericTypes: [jsonType, type])));
   }
 }
 
