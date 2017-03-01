@@ -5,8 +5,7 @@ import 'lib/person.dart';
 import 'package:xml/xml.dart';
 
 void main() {
-  final raw =
-      '<Item>'
+  final raw = '<Item>'
       '  <name>Jonah</name>'
       '  <id>1</id>'
       '  <description>This is a test</description>'

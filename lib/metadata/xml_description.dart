@@ -37,12 +37,11 @@ class DescriptionXml implements BuildsCodec {
       ..addConstructor(new ConstructorBuilder())
       ..addMethod(new MethodBuilder('convert', returnType: _xmlType)
         ..addPositional(new ParameterBuilder('input', type: type))
-        ..addStatement(
-            reference('XmlElement').newInstance([
-              reference('XmlName').newInstance([literal(key)]),
-              list(attributes.map((attr) => attr.buildEncoder(registry))),
-              list(elements.map((el) => el.buildEncoder(registry))),
-            ]).asReturn()));
+        ..addStatement(reference('XmlElement').newInstance([
+          reference('XmlName').newInstance([literal(key)]),
+          list(attributes.map((attr) => attr.buildEncoder(registry))),
+          list(elements.map((el) => el.buildEncoder(registry))),
+        ]).asReturn()));
   }
 
   @override
@@ -115,7 +114,6 @@ class DescriptionXmlElement {
       this.repeatedKey: 'item'})
       : this.key = key ?? name;
 
-
   ExpressionBuilder buildEncoder(Map<DartType, Metadata> registry) {
     final encode = registry[type].encoder(_input.property(name));
     final attrs = list([], asConst: true);
@@ -154,6 +152,7 @@ class DescriptionXmlElement {
 }
 
 XmlAttribute atr;
+
 /// A description of a codec to build an XmlAttribute from a class field.
 class DescriptionXmlAttribute {
   final String key;
