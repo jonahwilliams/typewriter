@@ -1,10 +1,14 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:code_builder/code_builder.dart';
+import 'package:collection/collection.dart';
+import 'package:xml/xml.dart';
 
 import 'metadata.dart';
 
-class XmlDescription implements BuildsCodec {
+const _listEquality = const ListEquality();
+
+class DescriptionXml implements BuildsCodec {
   static final _xmlType =
       new TypeBuilder('XmlElement', importFrom: 'package:xml/xml.dart');
   static final _builder = reference('builder');
@@ -12,24 +16,16 @@ class XmlDescription implements BuildsCodec {
 
   final String name;
   final String key;
-  final List<XmlElementDescription> elements;
-  final List<XmlAttributeDescription> attributes;
+  final List<DescriptionXmlElement> elements;
+  final List<DescriptionXmlAttribute> attributes;
 
-  const XmlDescription(this.name, this.key, this.elements,
-      [this.attributes = const []]);
+  const DescriptionXml(this.name,
+      {String key, this.elements: const [], this.attributes: const []})
+      : this.key = key ?? name;
 
   @override
   ClassBuilder buildEncoder(Map<DartType, Metadata> registry) {
-    final topLevelNest = new MethodBuilder.closure();
     final type = new TypeBuilder(name);
-
-    for (final element in elements) {
-      topLevelNest.addStatement(element.buildEncoder(registry));
-    }
-    for (final attribute in attributes) {
-      topLevelNest.addStatement(_builder
-          .invoke('attribute', [literal(attribute.key), literal('bar')]));
-    }
 
     return new ClassBuilder('_${name}Encoder',
         asExtends: new TypeBuilder('Converter',
@@ -42,10 +38,11 @@ class XmlDescription implements BuildsCodec {
       ..addMethod(new MethodBuilder('convert', returnType: _xmlType)
         ..addPositional(new ParameterBuilder('input', type: type))
         ..addStatement(
-            reference('XmlBuilder').newInstance(const []).asVar('builder'))
-        ..addStatement(_builder.invoke('element', [literal(key)],
-            namedArguments: {'nest': topLevelNest}))
-        ..addStatement(_builder.invoke('build', const []).asReturn()));
+            reference('XmlElement').newInstance([
+              reference('XmlName').newInstance([literal(key)]),
+              list(attributes.map((attr) => attr.buildEncoder(registry))),
+              list(elements.map((el) => el.buildEncoder(registry))),
+            ]).asReturn()));
   }
 
   @override
@@ -67,7 +64,7 @@ class XmlDescription implements BuildsCodec {
       ..addConstructor(new ConstructorBuilder())
       ..addMethod(new MethodBuilder('convert', returnType: type)
         ..addPositional(new ParameterBuilder('input', type: _xmlType))
-        ..addStatement(reference(name).newInstance(const []).asVar('output'))
+        ..addStatement(reference(name).newInstance(const []).asFinal('output'))
         ..addStatements(topLevelStatements)
         ..addStatement(_output.asReturn()));
   }
@@ -89,34 +86,47 @@ class XmlDescription implements BuildsCodec {
           returnType:
               new TypeBuilder('Converter', genericTypes: [_xmlType, type])));
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is DescriptionXml &&
+      other.name == name &&
+      other.key == key &&
+      _listEquality.equals(other.attributes, attributes) &&
+      _listEquality.equals(other.elements, elements);
 }
 
-class XmlElementDescription {
+class DescriptionXmlElement {
   static final _builder = reference('builder');
   static final _output = reference('output');
   static final _input = reference('input');
 
   final String key;
-  final String field;
+  final String name;
   final bool repeated;
   final String repeatedKey;
   final DartType type;
-  final List<XmlAttributeDescription> attributes;
+  final List<DescriptionXmlAttribute> attributes;
 
-  const XmlElementDescription(
-      this.key, this.field, this.repeated, this.type, this.attributes,
-      [this.repeatedKey = 'item']);
+  const DescriptionXmlElement(this.name, this.type,
+      {String key,
+      this.repeated: false,
+      this.attributes: const [],
+      this.repeatedKey: 'item'})
+      : this.key = key ?? name;
 
-  StatementBuilder buildEncoder(Map<DartType, Metadata> registry) {
-    final encode = registry[type].encoder(_input.property(field));
 
-    return _builder.invoke('element', [
-      literal(key),
-    ], namedArguments: {
-      'nest': new MethodBuilder.closure()
-        ..addStatement(_builder.invoke('text', [encode]))
-        ..addStatements(attributes.map((x) => x.buildEncoder(registry)))
-    });
+  ExpressionBuilder buildEncoder(Map<DartType, Metadata> registry) {
+    final encode = registry[type].encoder(_input.property(name));
+    final attrs = list([], asConst: true);
+
+    return reference('XmlElement').newInstance([
+      reference('XmlName').newInstance([literal(key)]),
+      attrs,
+      list([
+        reference('XmlText').newInstance([encode])
+      ])
+    ]);
   }
 
   StatementBuilder buildDecoder(Map<DartType, Metadata> registry) {
@@ -125,19 +135,48 @@ class XmlElementDescription {
         .property('first')
         .property('text'));
 
-    return decode.asAssign(_output.property(field));
+    return decode.asAssign(_output.property(name));
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is DescriptionXmlElement &&
+      other.name == name &&
+      other.key == key &&
+      other.repeated == repeated &&
+      other.repeatedKey == repeatedKey &&
+      other.type == type &&
+      _listEquality.equals(other.attributes, attributes);
+
+  @override
+  String toString() => '<$this $name:$key $type repeated: '
+      '$repeated [$attributes]>';
 }
 
-class XmlAttributeDescription {
-  static final _builder = reference('builder');
+XmlAttribute atr;
+/// A description of a codec to build an XmlAttribute from a class field.
+class DescriptionXmlAttribute {
   final String key;
+  final String name;
   final DartType type;
-  final String value;
 
-  const XmlAttributeDescription(this.key, this.value, this.type);
+  const DescriptionXmlAttribute(this.name, this.type, {String key})
+      : this.key = key ?? name;
 
   ExpressionBuilder buildEncoder(Map<DartType, Metadata> registry) {
-    return _builder.invoke('attribute', [literal(key), literal(value)]);
+    final encode = registry[type].encoder(reference('input').property(name));
+    return reference('XmlAttribute').newInstance([
+      reference('XmlName').newInstance([literal(key)]),
+      encode,
+    ]);
   }
+
+  ExpressionBuilder buildDecoder(Map<DartType, Metadata> registry) {}
+
+  @override
+  bool operator ==(Object other) =>
+      other is DescriptionXmlAttribute &&
+      other.name == name &&
+      other.key == key &&
+      other.type == type;
 }

@@ -5,13 +5,13 @@ import 'lib/person.dart';
 import 'package:xml/xml.dart';
 
 void main() {
-  var raw =
+  final raw =
       '<Item>'
       '  <name>Jonah</name>'
       '  <id>1</id>'
       '  <description>This is a test</description>'
       '  <why>why</why>'
       '</Item>';
-  var item = new ItemCodec().decode(parse(raw).firstChild);
-  print(item);
+  final item = new ItemCodec().decode(parse(raw).firstChild);
+  print(item.description);
 }

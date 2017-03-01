@@ -1,15 +1,16 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:code_builder/code_builder.dart';
+import 'package:collection/collection.dart';
 
 import 'metadata.dart';
 
 /// A description and builder for JSON codecs.
-class JsonDescription implements BuildsCodec {
+class DescriptionJson implements BuildsCodec {
   final String name;
-  final List<JsonFieldDescription> fields;
+  final List<DescriptionJsonField> fields;
 
-  const JsonDescription(this.name, this.fields);
+  const DescriptionJson(this.name, this.fields);
 
   @override
   ClassBuilder buildEncoder(Map<DartType, Metadata> registry) {
@@ -70,13 +71,13 @@ class JsonDescription implements BuildsCodec {
   }
 }
 
-class JsonFieldDescription {
+class DescriptionJsonField {
   final String key;
   final String field;
   final bool repeated;
   final DartType type;
 
-  const JsonFieldDescription(this.field, this.type,
+  const DescriptionJsonField(this.field, this.type,
       {this.repeated: false, String key})
       : this.key = key ?? field;
 
@@ -104,7 +105,7 @@ class JsonFieldDescription {
 
   @override
   bool operator ==(Object other) =>
-      other is JsonFieldDescription &&
+      other is DescriptionJsonField &&
       other.key == key &&
       other.field == field &&
       other.repeated == repeated &&

@@ -18,9 +18,9 @@ void main() {
 
   group('Json encoder', () {
     test('encodes a class', () {
-      final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', stringType),
-        new JsonFieldDescription('id', intType),
+      final description = new DescriptionJson('People', [
+        new DescriptionJsonField('name', stringType),
+        new DescriptionJsonField('id', intType),
       ]);
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
@@ -40,9 +40,9 @@ void main() {
     });
 
     test('encodes a class with repeated fields', () {
-      final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', stringType),
-        new JsonFieldDescription('values', intType, repeated: true),
+      final description = new DescriptionJson('People', [
+        new DescriptionJsonField('name', stringType),
+        new DescriptionJsonField('values', intType, repeated: true),
       ]);
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
@@ -65,9 +65,9 @@ void main() {
 
   group('Json decoder', () {
     test('decodes a class', () {
-      final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', stringType),
-        new JsonFieldDescription('id', intType),
+      final description = new DescriptionJson('People', [
+        new DescriptionJsonField('name', stringType),
+        new DescriptionJsonField('id', intType),
       ]);
       final decoder =
           prettyToSource(description.buildDecoder(registry).buildClass());
@@ -89,9 +89,9 @@ void main() {
 
   group('Json Codec', () {
     test('creates a class which exposes the encoder and decoder', () {
-      final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', stringType),
-        new JsonFieldDescription('id', intType),
+      final description = new DescriptionJson('People', [
+        new DescriptionJsonField('name', stringType),
+        new DescriptionJsonField('id', intType),
       ]);
       final codec =
           prettyToSource(description.buildCodec(registry).buildClass());

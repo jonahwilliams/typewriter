@@ -20,7 +20,7 @@ class AnalysisJsonSimple implements Analysis {
 
     // May not have final fields
     // static fields are OK, and any fields with @Ignore are completely ignored.
-    final fields = <JsonFieldDescription>[];
+    final fields = <DescriptionJsonField>[];
     for (final field in element.fields) {
       if (field.metadata
           .any((an) => _typeProvider.isIgnore(an.constantValue.type))) {
@@ -38,15 +38,15 @@ class AnalysisJsonSimple implements Analysis {
 
       if (field.type.displayName.contains('List')) {
         final type = (field.type as ParameterizedType).typeArguments.first;
-        fields.add(new JsonFieldDescription(field.name, type,
+        fields.add(new DescriptionJsonField(field.name, type,
             repeated: true, key: key));
       } else {
-        fields.add(new JsonFieldDescription(field.name, field.type, key: key));
+        fields.add(new DescriptionJsonField(field.name, field.type, key: key));
       }
     }
     registry[element.type] = new Metadata.composite(element.name);
 
-    return new JsonDescription(element.displayName, fields);
+    return new DescriptionJson(element.displayName, fields);
   }
 }
 

@@ -14,7 +14,7 @@ import 'package:typewriter/src/system_type_provider.dart';
 
 void main() {
   group('Analysis', () {
-    Resolver resolver = new Resolver();
+    final resolver = new Resolver();
     LibraryElement library;
     ClassElement element;
     TypeProvider provider;
@@ -49,17 +49,17 @@ void main() {
         new FieldBuilder('symbol', type: new TypeBuilder('Symbol')),
       ]);
       await loadClass(builder, 'Dog');
-      final description = analysis.analyze(element, {}) as JsonDescription;
+      final description = analysis.analyze(element, {}) as DescriptionJson;
 
       expect(description.name, 'Dog');
       expect(
           description.fields,
           unorderedEquals([
-            new JsonFieldDescription('name', provider.stringType),
-            new JsonFieldDescription('id', provider.intType),
-            new JsonFieldDescription('isAlive', provider.boolType),
-            new JsonFieldDescription('money', provider.doubleType),
-            new JsonFieldDescription('symbol', provider.symbolType),
+            new DescriptionJsonField('name', provider.stringType),
+            new DescriptionJsonField('id', provider.intType),
+            new DescriptionJsonField('isAlive', provider.boolType),
+            new DescriptionJsonField('money', provider.doubleType),
+            new DescriptionJsonField('symbol', provider.symbolType),
           ]));
     });
 
@@ -72,11 +72,11 @@ void main() {
           '  String name;\n'
           '}\n',
           'Dog');
-      final description = analysis.analyze(element, {}) as JsonDescription;
+      final description = analysis.analyze(element, {}) as DescriptionJson;
 
       expect(description.name, 'Dog');
       expect(description.fields,
-          unorderedEquals([new JsonFieldDescription('id', provider.intType)]));
+          unorderedEquals([new DescriptionJsonField('id', provider.intType)]));
     });
 
     test('class with repeated public fields', () async {
@@ -87,11 +87,11 @@ void main() {
                     genericTypes: [new TypeBuilder('String')]))
           ]),
           'Dog');
-      final description = analysis.analyze(element, {}) as JsonDescription;
+      final description = analysis.analyze(element, {}) as DescriptionJson;
 
       expect(description.name, 'Dog');
       expect(description.fields, [
-        new JsonFieldDescription('names', provider.stringType, repeated: true)
+        new DescriptionJsonField('names', provider.stringType, repeated: true)
       ]);
     });
 
@@ -136,11 +136,11 @@ void main() {
       ''',
           'Dog');
 
-      final description = analysis.analyze(element, {}) as JsonDescription;
+      final description = analysis.analyze(element, {}) as DescriptionJson;
 
       expect(description.name, 'Dog');
       expect(description.fields, [
-        new JsonFieldDescription('birthDay', provider.doubleType,
+        new DescriptionJsonField('birthDay', provider.doubleType,
             key: 'birth_day')
       ]);
     });

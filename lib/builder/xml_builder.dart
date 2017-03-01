@@ -45,7 +45,7 @@ class XmlBuilder implements Builder {
   void _initialize(LibraryElement coreLib, LibraryElement typewriterLib) {
     _typeProvider = new SystemTypeProvider(typewriterLib);
     _registry = buildXmlRegistry(coreLib);
-    _analysis = new XmlSimpleAnalysis(_typeProvider);
+    _analysis = new AnalysisXmlSimple(_typeProvider);
   }
 
   /// TODO: refactor to grab any class with library specific class annotation
