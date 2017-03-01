@@ -5,5 +5,3 @@
 ///
 /// More dartdocs go here.
 library typewriter;
-
-export 'package:typewriter/annotations/annotations.dart';

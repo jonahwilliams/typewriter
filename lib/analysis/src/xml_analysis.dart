@@ -1,10 +1,10 @@
 part of typewriter.analysis;
 
-class XmlSimpleAnalysis implements Analysis {
+class AnalysisXmlSimple implements Analysis {
   final SystemTypeProvider _typeProvider;
 
   /// Creates a simple analysis instance.
-  XmlSimpleAnalysis(this._typeProvider);
+  AnalysisXmlSimple(this._typeProvider);
 
   @override
   BuildsCodec analyze(ClassElement element, Map<DartType, Metadata> registry) {
@@ -19,7 +19,7 @@ class XmlSimpleAnalysis implements Analysis {
 
     // May not have final fields
     // static fields are OK, and any fields with @Ignore are completely ignored.
-    final fields = <XmlElementDescription>[];
+    final fields = <DescriptionXmlElement>[];
     for (final field in element.fields) {
       if (field.metadata
           .any((an) => _typeProvider.isIgnore(an.constantValue.type))) {
@@ -39,12 +39,10 @@ class XmlSimpleAnalysis implements Analysis {
 //        fields.add(new JsonFieldDescription(key, field.name, true,
 //            (field.type as ParameterizedType).typeArguments.first));
 //      } else {
-      fields.add(new XmlElementDescription(
-          field.name, field.name, false, field.type, []));
+      fields.add(new DescriptionXmlElement(field.name, field.type));
     }
     registry[element.type] = new Metadata.composite(element.name);
 
-    return new XmlDescription(
-        element.displayName, element.displayName, fields, []);
+    return new DescriptionXml(element.displayName, elements: fields);
   }
 }

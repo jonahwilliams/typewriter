@@ -18,17 +18,17 @@ void main() {
 
   group('Json encoder', () {
     test('encodes a class', () {
-      final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', stringType),
-        new JsonFieldDescription('id', intType),
+      final description = new DescriptionJson('People', [
+        new DescriptionJsonField('name', stringType),
+        new DescriptionJsonField('id', intType),
       ]);
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
       final expected =
-          'class _PeopleEncoder extends Converter<People, Object> {\n'
+          'class _PeopleEncoder extends Converter<People, Map<String, dynamic>> {\n'
           '  _PeopleEncoder();\n'
           '\n'
-          '  Object convert(People input) {\n'
+          '  Map<String, dynamic> convert(People input) {\n'
           '    var output = <String, dynamic>{};\n'
           '    output[\'name\'] = input.name;\n'
           '    output[\'id\'] = input.id;\n'
@@ -40,17 +40,17 @@ void main() {
     });
 
     test('encodes a class with repeated fields', () {
-      final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', stringType),
-        new JsonFieldDescription('values', intType, repeated: true),
+      final description = new DescriptionJson('People', [
+        new DescriptionJsonField('name', stringType),
+        new DescriptionJsonField('values', intType, repeated: true),
       ]);
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
       final expected =
-          'class _PeopleEncoder extends Converter<People, Object> {\n'
+          'class _PeopleEncoder extends Converter<People, Map<String, dynamic>> {\n'
           '  _PeopleEncoder();\n'
           '\n'
-          '  Object convert(People input) {\n'
+          '  Map<String, dynamic> convert(People input) {\n'
           '    var output = <String, dynamic>{};\n'
           '    output[\'name\'] = input.name;\n'
           '    output[\'values\'] = input.values.map((x) => x).toList();\n'
@@ -65,18 +65,17 @@ void main() {
 
   group('Json decoder', () {
     test('decodes a class', () {
-      final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', stringType),
-        new JsonFieldDescription('id', intType),
+      final description = new DescriptionJson('People', [
+        new DescriptionJsonField('name', stringType),
+        new DescriptionJsonField('id', intType),
       ]);
       final decoder =
           prettyToSource(description.buildDecoder(registry).buildClass());
       final expected =
-          'class _PeopleDecoder extends Converter<Object, People> {\n'
+          'class _PeopleDecoder extends Converter<Map<String, dynamic>, People> {\n'
           '  _PeopleDecoder();\n'
           '\n'
-          '  People convert(Object rawInput) {\n'
-          '    var input = rawInput as Map<String, dynamic>;\n'
+          '  People convert(Map<String, dynamic> input) {\n'
           '    var output = new People();\n'
           '    output.name = input[\'name\'];\n'
           '    output.id = input[\'id\'];\n'
@@ -90,18 +89,19 @@ void main() {
 
   group('Json Codec', () {
     test('creates a class which exposes the encoder and decoder', () {
-      final description = new JsonDescription('People', [
-        new JsonFieldDescription('name', stringType),
-        new JsonFieldDescription('id', intType),
+      final description = new DescriptionJson('People', [
+        new DescriptionJsonField('name', stringType),
+        new DescriptionJsonField('id', intType),
       ]);
       final codec =
           prettyToSource(description.buildCodec(registry).buildClass());
-      final expected = 'class PeopleCodec extends Codec<Object, People> {\n'
+      final expected =
+          'class PeopleCodec extends Codec<People, Map<String, dynamic>> {\n'
           '  PeopleCodec();\n'
           '\n'
-          '  Converter<People, Object> get encoder => new _PeopleEncoder();\n'
+          '  Converter<People, Map<String, dynamic>> get encoder => new _PeopleEncoder();\n'
           '\n'
-          '  Converter<Object, People> get decoder => new _PeopleDecoder();\n'
+          '  Converter<Map<String, dynamic>, People> get decoder => new _PeopleDecoder();\n'
           '}\n';
 
       expect(codec, expected);

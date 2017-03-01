@@ -1,11 +1,11 @@
 part of typewriter.analysis;
 
 /// Performs an analysis where the source class only contains public fields.
-class JsonAnalysisSimple implements Analysis {
+class AnalysisJsonSimple implements Analysis {
   final SystemTypeProvider _typeProvider;
 
   /// Creates a simple analysis instance.
-  JsonAnalysisSimple(this._typeProvider);
+  AnalysisJsonSimple(this._typeProvider);
 
   @override
   BuildsCodec analyze(ClassElement element, Map<DartType, Metadata> registry) {
@@ -20,7 +20,7 @@ class JsonAnalysisSimple implements Analysis {
 
     // May not have final fields
     // static fields are OK, and any fields with @Ignore are completely ignored.
-    final fields = <JsonFieldDescription>[];
+    final fields = <DescriptionJsonField>[];
     for (final field in element.fields) {
       if (field.metadata
           .any((an) => _typeProvider.isIgnore(an.constantValue.type))) {
@@ -31,22 +31,22 @@ class JsonAnalysisSimple implements Analysis {
       }
       final keyAnnotation = field.metadata.firstWhere(
           (annotation) =>
-              _typeProvider.isJsonKey(annotation.constantValue.type),
+              _typeProvider.isPropertyJson(annotation.constantValue.type),
           orElse: () => null);
       final key =
           keyAnnotation?.constantValue?.getField('key')?.toStringValue();
 
       if (field.type.displayName.contains('List')) {
         final type = (field.type as ParameterizedType).typeArguments.first;
-        fields.add(new JsonFieldDescription(field.name, type,
+        fields.add(new DescriptionJsonField(field.name, type,
             repeated: true, key: key));
       } else {
-        fields.add(new JsonFieldDescription(field.name, field.type, key: key));
+        fields.add(new DescriptionJsonField(field.name, field.type, key: key));
       }
     }
     registry[element.type] = new Metadata.composite(element.name);
 
-    return new JsonDescription(element.displayName, fields);
+    return new DescriptionJson(element.displayName, fields);
   }
 }
 

@@ -16,7 +16,7 @@ Typewriter annotations configure the behavior of the generated codecs.  For exam
 @Json()
 class Person {
   int age;
-  @JsonKey('birth_day')
+  @PropertyJson('birth_day')
   DateTime birthDay;
   String name;
   Cat myCat;
@@ -38,10 +38,10 @@ Xml annotations support configuring the names of elements and child elements wit
 ```dart
 @Xml('FooBar')
 class ApiResponse {
-  @XmlElement('name-list', 'name')
+  @ElementXml('name-list', 'name')
   List<String> names;
   
-  @XmlAttribute('name-length', element: 'name-list')
+  @AttributeXml('name-length', element: 'name-list')
   int lenth;
 }
 ```
@@ -57,19 +57,19 @@ The following is an instance of `ApiResponse` serialized to XML.  Typewriter als
 </FooBar>
 ```
 
-In case a developer needs to implement specific serialization logic, Typewriter allows specification of `Encoder` and `Decoder` annotations.
+Typewriter allows specification of `Encoder` and `Decoder` annotations for specific serialization logic or immutable data.
 
 ```dart
 @Json(customEncoder: true)
 class Dog {  
-  @JsonDecoder()
+  @DecodeJson()
   factory Dog(Object input) {
     return new Dog._();
   }
   
   Dog._();
   
-  @JsonEncoder()
+  @EncodeJson()
   Object encode() {
     return {'bark': 'woof'};
   }
