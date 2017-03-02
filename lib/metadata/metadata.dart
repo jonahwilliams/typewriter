@@ -8,6 +8,8 @@ abstract class BuildsCodec {
   ClassBuilder buildDecoder(Map<DartType, Metadata> registry);
 
   ClassBuilder buildEncoder(Map<DartType, Metadata> registry);
+
+  String get name;
 }
 
 typedef ExpressionBuilder ExpressionBuilderBuilder(

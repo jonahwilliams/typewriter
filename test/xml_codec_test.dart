@@ -27,10 +27,10 @@ void main() {
       final encoder =
           prettyToSource(description.buildEncoder(registry).buildClass());
       final expected =
-          'class _PeopleEncoder extends Converter<People, XmlElement> {\n'
+          'class _PeopleEncoder extends Converter<People, XmlNode> {\n'
           '  _PeopleEncoder();\n'
           '\n'
-          '  XmlElement convert(People input) {\n'
+          '  XmlNode convert(People input) {\n'
           '    return new XmlElement(new XmlName(\'People\'), [], [\n'
           '      new XmlElement(new XmlName(\'name\'), const [], [new XmlText(input.name)]),\n'
           '      new XmlElement(\n'
@@ -49,10 +49,14 @@ void main() {
       final decoder =
           prettyToSource(description.buildDecoder(registry).buildClass());
       final expected =
-          'class _PeopleDecoder extends Converter<XmlElement, People> {\n'
+          'class _PeopleDecoder extends Converter<XmlNode, People> {\n'
           '  _PeopleDecoder();\n'
           '\n'
-          '  People convert(XmlElement input) {\n'
+          '  People convert(XmlNode inputRaw) {\n'
+          '    final input = inputRaw as XmlElement;\n'
+          '    if (input.name.local != \'People\') {\n'
+          '      throw new Exception(\'\');\n'
+          '    }\n'
           '    final output = new People();\n'
           '    output.name = input.findElements(\'name\').first.text;\n'
           '    output.id = int.parse(input.findElements(\'id\').first.text);\n'
@@ -68,12 +72,12 @@ void main() {
     test('creates a class which exposes the encoder and decoder', () {
       final codec =
           prettyToSource(description.buildCodec(registry).buildClass());
-      final expected = 'class PeopleCodec extends Codec<People, XmlElement> {\n'
+      final expected = 'class PeopleCodec extends Codec<People, XmlNode> {\n'
           '  PeopleCodec();\n'
           '\n'
-          '  Converter<People, XmlElement> get encoder => new _PeopleEncoder();\n'
+          '  Converter<People, XmlNode> get encoder => new _PeopleEncoder();\n'
           '\n'
-          '  Converter<XmlElement, People> get decoder => new _PeopleDecoder();\n'
+          '  Converter<XmlNode, People> get decoder => new _PeopleDecoder();\n'
           '}\n';
 
       expect(codec, expected);

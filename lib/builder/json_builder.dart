@@ -27,15 +27,17 @@ class JsonBuilder implements Builder {
         resolver.getLibraryByName('typewriter.annotations'));
 
     final library = resolver.getLibrary(step.inputId);
-    final codecs = <BuildsCodec>[];
-    for (final element in _getClassElements(library)) {
-      codecs.add(_analysis.analyze(element, _registry));
-    }
+    final codecs = _getClassElements(library)
+        .map((el) => _analysis.analyze(el, _registry))
+        .toList();
 
     final result = new PartBuilder(library.name)
+      ..addMember(
+          reference('JsonCodec').constInstance(const []).asConst('_jsonCodec'))
       ..addMembers(codecs.map((codec) => codec.buildEncoder(_registry)))
       ..addMembers(codecs.map((codec) => codec.buildDecoder(_registry)))
-      ..addMembers(codecs.map((codec) => codec.buildCodec(_registry)));
+      ..addMembers(codecs.map((codec) => codec.buildCodec(_registry)))
+      ..addMembers(codecs.map((codec) => _fuseCodec(codec.name)));
 
     await step.writeAsString(
         _generatedFile(step.inputId), prettyToSource(result.buildAst()));
@@ -46,6 +48,14 @@ class JsonBuilder implements Builder {
     _registry = buildJsonRegistry(coreLib);
     _analysis = new AnalysisJsonSimple(_typeProvider);
   }
+
+  StatementBuilder _fuseCodec(String name) => reference('${name}Codec')
+      .newInstance([]).invoke('fuse', [reference('_jsonCodec')]).asFinal(
+          '${name.toLowerCase()}JsonCodec',
+          new TypeBuilder('Codec', genericTypes: [
+            new TypeBuilder(name),
+            new TypeBuilder('String'),
+          ]));
 
   Iterable<ClassElement> _getClassElements(LibraryElement unit) {
     final declarations = <Declaration>[]

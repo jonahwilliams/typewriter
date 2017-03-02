@@ -7,6 +7,7 @@ import 'metadata.dart';
 
 /// A description and builder for JSON codecs.
 class DescriptionJson implements BuildsCodec {
+  @override
   final String name;
   final List<DescriptionJsonField> fields;
 
@@ -93,8 +94,10 @@ class DescriptionJsonField {
           .invoke('map', [converter]).invoke(
               'toList', const []).asAssign(reference('output')[literal(key)]);
     }
-
-    final encode = registry[type].encoder(reference('input').property(field));
+    final encode = registry[type]?.encoder(reference('input').property(field));
+    if (encode == null) {
+      throw new Exception('Could not find encoder for $type');
+    }
     return encode.asAssign(reference('output')[literal(key)]);
   }
 

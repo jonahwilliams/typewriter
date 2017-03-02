@@ -34,9 +34,15 @@ class XmlBuilder implements Builder {
     }
 
     final result = new PartBuilder(library.name)
+      ..addMembers([
+        _xmlEncoder,
+        _xmlDecoder,
+        _xmlCodec,
+      ])
       ..addMembers(codecs.map((codec) => codec.buildEncoder(_registry)))
       ..addMembers(codecs.map((codec) => codec.buildDecoder(_registry)))
-      ..addMembers(codecs.map((codec) => codec.buildCodec(_registry)));
+      ..addMembers(codecs.map((codec) => codec.buildCodec(_registry)))
+      ..addMembers(codecs.map((codec) => _fuseCodec(codec.name)));
 
     await step.writeAsString(
         _generatedFile(step.inputId), prettyToSource(result.buildAst()));
@@ -64,4 +70,61 @@ class XmlBuilder implements Builder {
   }
 
   AssetId _generatedFile(AssetId input) => input.changeExtension('.xml.g.dart');
+
+  StatementBuilder _fuseCodec(String name) =>
+      reference('${name}Codec').newInstance([]).invoke('fuse', [
+        reference('_XmlCodec').newInstance([])
+      ]).asFinal(
+          '${name.toLowerCase()}XmlCodec',
+          new TypeBuilder('Codec', genericTypes: [
+            new TypeBuilder(name),
+            new TypeBuilder('String'),
+          ]));
+
+  static final StatementBuilder _xmlCodec = new ClassBuilder('_XmlCodec',
+      asExtends: new TypeBuilder('Codec', genericTypes: [
+        new TypeBuilder('XmlNode'),
+        new TypeBuilder('String'),
+      ]))
+    ..addMethod(new MethodBuilder.getter('encoder',
+        returnType: new TypeBuilder('Converter', genericTypes: [
+          new TypeBuilder('XmlNode'),
+          new TypeBuilder('String'),
+        ]),
+        returns: reference('_XmlEncoder').newInstance([])))
+    ..addMethod(new MethodBuilder.getter('decoder',
+        returnType: new TypeBuilder('Converter', genericTypes: [
+          new TypeBuilder('String'),
+          new TypeBuilder('XmlNode'),
+        ]),
+        returns: reference('_XmlDecoder').newInstance([])));
+
+  static final StatementBuilder _xmlEncoder = new ClassBuilder('_XmlEncoder',
+      asExtends: new TypeBuilder('Converter', genericTypes: [
+        new TypeBuilder('XmlNode'),
+        new TypeBuilder('String'),
+      ]))
+    ..addMethod(
+        new MethodBuilder('convert', returnType: new TypeBuilder('String'))
+          ..addPositional(
+              new ParameterBuilder('input', type: new TypeBuilder('XmlNode')))
+          ..addStatement(reference('XmlProcessing').newInstance(
+              [literal('xml'), literal('version="1.0"')]).asFinal('processing'))
+          ..addStatement(reference('XmlDocument').newInstance([
+            list([reference('processing'), reference('input')])
+          ]).invoke('toString', const []).asReturn()));
+
+  static final StatementBuilder _xmlDecoder = new ClassBuilder('_XmlDecoder',
+      asExtends: new TypeBuilder('Converter', genericTypes: [
+        new TypeBuilder('String'),
+        new TypeBuilder('XmlNode'),
+      ]))
+    ..addMethod(
+        new MethodBuilder('convert', returnType: new TypeBuilder('XmlNode'))
+          ..addPositional(
+              new ParameterBuilder('input', type: new TypeBuilder('String')))
+          ..addStatement(reference('parse')
+              .call([reference('input')])
+              .property('rootElement')
+              .asReturn()));
 }

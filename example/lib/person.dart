@@ -12,8 +12,8 @@ class Person {
   Symbol opaque;
 }
 
-@Json()
 @Xml()
+@Json()
 class Item {
   String name;
   int id;

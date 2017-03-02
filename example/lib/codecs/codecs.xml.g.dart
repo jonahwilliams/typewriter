@@ -1,9 +1,28 @@
 part of typewriter.example.codecs;
 
-class _ItemEncoder extends Converter<Item, XmlElement> {
+class _XmlEncoder extends Converter<XmlNode, String> {
+  String convert(XmlNode input) {
+    final processing = new XmlProcessing('xml', 'version="1.0"');
+    return new XmlDocument([processing, input]).toString();
+  }
+}
+
+class _XmlDecoder extends Converter<String, XmlNode> {
+  XmlNode convert(String input) {
+    return parse(input).rootElement;
+  }
+}
+
+class _XmlCodec extends Codec<XmlNode, String> {
+  Converter<XmlNode, String> get encoder => new _XmlEncoder();
+
+  Converter<String, XmlNode> get decoder => new _XmlDecoder();
+}
+
+class _ItemEncoder extends Converter<Item, XmlNode> {
   _ItemEncoder();
 
-  XmlElement convert(Item input) {
+  XmlNode convert(Item input) {
     return new XmlElement(new XmlName('Item'), [], [
       new XmlElement(new XmlName('name'), const [], [new XmlText(input.name)]),
       new XmlElement(
@@ -16,10 +35,14 @@ class _ItemEncoder extends Converter<Item, XmlElement> {
   }
 }
 
-class _ItemDecoder extends Converter<XmlElement, Item> {
+class _ItemDecoder extends Converter<XmlNode, Item> {
   _ItemDecoder();
 
-  Item convert(XmlElement input) {
+  Item convert(XmlNode inputRaw) {
+    final input = inputRaw as XmlElement;
+    if (input.name.local != 'Item') {
+      throw new Exception('');
+    }
     final output = new Item();
     output.name = input.findElements('name').first.text;
     output.id = int.parse(input.findElements('id').first.text);
@@ -29,10 +52,12 @@ class _ItemDecoder extends Converter<XmlElement, Item> {
   }
 }
 
-class ItemCodec extends Codec<Item, XmlElement> {
+class ItemCodec extends Codec<Item, XmlNode> {
   ItemCodec();
 
-  Converter<Item, XmlElement> get encoder => new _ItemEncoder();
+  Converter<Item, XmlNode> get encoder => new _ItemEncoder();
 
-  Converter<XmlElement, Item> get decoder => new _ItemDecoder();
+  Converter<XmlNode, Item> get decoder => new _ItemDecoder();
 }
+
+final Codec<Item, String> itemXmlCodec = new ItemCodec().fuse(new _XmlCodec());

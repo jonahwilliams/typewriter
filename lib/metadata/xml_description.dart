@@ -10,7 +10,7 @@ const _listEquality = const ListEquality();
 
 class DescriptionXml implements BuildsCodec {
   static final _xmlType =
-      new TypeBuilder('XmlElement', importFrom: 'package:xml/xml.dart');
+      new TypeBuilder('XmlNode', importFrom: 'package:xml/xml.dart');
   static final _builder = reference('builder');
   static final _output = reference('output');
 
@@ -62,7 +62,17 @@ class DescriptionXml implements BuildsCodec {
             importFrom: 'dart:convert'))
       ..addConstructor(new ConstructorBuilder())
       ..addMethod(new MethodBuilder('convert', returnType: type)
-        ..addPositional(new ParameterBuilder('input', type: _xmlType))
+        ..addPositional(new ParameterBuilder('inputRaw', type: _xmlType))
+        ..addStatement(reference('inputRaw')
+            .castAs(new TypeBuilder('XmlElement'))
+            .asFinal('input'))
+        ..addStatement(reference('input')
+            .property('name')
+            .property('local')
+            .notEquals(literal(key))
+            .asIf()
+              ..addStatement(new StatementBuilder.raw(
+                  (_) => 'throw new Exception(\'\');')))
         ..addStatement(reference(name).newInstance(const []).asFinal('output'))
         ..addStatements(topLevelStatements)
         ..addStatement(_output.asReturn()));
@@ -96,7 +106,6 @@ class DescriptionXml implements BuildsCodec {
 }
 
 class DescriptionXmlElement {
-  static final _builder = reference('builder');
   static final _output = reference('output');
   static final _input = reference('input');
 
@@ -150,8 +159,6 @@ class DescriptionXmlElement {
   String toString() => '<$this $name:$key $type repeated: '
       '$repeated [$attributes]>';
 }
-
-XmlAttribute atr;
 
 /// A description of a codec to build an XmlAttribute from a class field.
 class DescriptionXmlAttribute {
