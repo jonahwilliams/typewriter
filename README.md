@@ -36,7 +36,7 @@ An instance of this class serialized to JSON would look something like the follo
 Xml annotations support configuring the names of elements and child elements with `XmlElement`.  The annotation `XmlAttribute` allows developers to place annotations on any of the elements in the class.
 
 ```dart
-@deriveXml(')
+@deriveXml()
 class ApiResponse {
   @xmlElement('name-list', 'name')
   List<String> names;
