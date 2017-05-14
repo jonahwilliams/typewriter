@@ -7,4 +7,4 @@ import 'dart:convert';
 import 'package:xml/xml.dart';
 
 //part 'codecs.json.g.dart';
-part 'codecs.xml.g.dart';
+part 'codecs.json.g.dart';

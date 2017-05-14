@@ -3,59 +3,39 @@ import 'package:analyzer/dart/element/type.dart';
 
 /// Provides [DartType]s for the annotation elements.
 class SystemTypeProvider {
-  /// An annotation which tells analysis to ignore the field.
-  final DartType _ignore;
-
-  /// An annotation which provides a different key name.
-  final DartType _propertyJson;
-
-  /// An annotation which tells analysis to use the json builder.
-  final DartType _json;
-
-  /// An annotation which switches to a custom encoder/decoder strategy.
-  final DartType _encodeJson;
-
-  /// Same as above, must be paired to work correctly.
-  final DartType _decodeJson;
-
-  /// An annotation which tells analysis to use the xml builder.
-  final DartType _xml;
-
-  /// An annotation which tells analysis to override the default behavior for
-  /// xml builders
-  final DartType _elementXml;
-  final DartType _attributeXml;
+  final DartType _ignore,
+      _deriveJson,
+      _deriveXml,
+      _jsonProperty,
+      _xmlElement,
+      _xmlAttribute;
 
   /// Builds a new [SystemTypeProvider] from the package:typewriter
   /// annotation library element.
   factory SystemTypeProvider(LibraryElement library) {
     return new SystemTypeProvider._(
-        library.getType('Ignore').type,
-        library.getType('PropertyJson').type,
-        library.getType('Json').type,
-        library.getType('EncodeJson').type,
-        library.getType('DecodeJson').type,
-        library.getType('Xml').type,
-        library.getType('ElementXml').type,
-        library.getType('AttributeXml').type);
+      library.getType('ignore').type,
+      library.getType('deriveJson').type,
+      library.getType('deriveXml').type,
+      library.getType('xmlElement').type,
+      library.getType('xmlAttribute').type,
+      library.getType('jsonProperty').type,
+    );
   }
 
   SystemTypeProvider._(
-      this._ignore,
-      this._propertyJson,
-      this._json,
-      this._encodeJson,
-      this._decodeJson,
-      this._xml,
-      this._elementXml,
-      this._attributeXml);
+    this._ignore,
+    this._deriveJson,
+    this._deriveXml,
+    this._xmlElement,
+    this._xmlAttribute,
+    this._jsonProperty,
+  );
 
   bool isIgnore(DartType type) => type.isAssignableTo(_ignore);
-  bool isPropertyJson(DartType type) => type.isAssignableTo(_propertyJson);
-  bool isJson(DartType type) => type.isAssignableTo(_json);
-  bool isEncodeJson(DartType type) => type.isAssignableTo(_decodeJson);
-  bool isDecodeJson(DartType type) => type.isAssignableTo(_encodeJson);
-  bool isXml(DartType type) => type.isAssignableTo(_xml);
-  bool isElementXml(DartType type) => type.isAssignableTo(_elementXml);
-  bool isAttributeXml(DartType type) => type.isAssignableTo(_attributeXml);
+  bool isJsonProperty(DartType type) => type.isAssignableTo(_jsonProperty);
+  bool isDeriveJson(DartType type) => type.isAssignableTo(_deriveJson);
+  bool isDeriveXml(DartType type) => type.isAssignableTo(_deriveXml);
+  bool isXmlElement(DartType type) => type.isAssignableTo(_xmlElement);
+  bool isXmlAttribute(DartType type) => type.isAssignableTo(_xmlAttribute);
 }
