@@ -1,4 +1,8 @@
+library typewriter.example.person;
+
+import 'dart:convert';
 import 'package:typewriter/annotations.dart';
+part 'person.json.g.dart';
 
 @deriveJson()
 class Person {
