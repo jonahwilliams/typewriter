@@ -42,7 +42,7 @@ class ApiResponse {
   List<String> names;
   
   @xmlAttribute('name-length', element: 'name-list')
-  int lenth;
+  int length;
 }
 ```
 The following is an instance of `ApiResponse` serialized to XML.  Typewriter also handles the xml header.
@@ -56,5 +56,3 @@ The following is an instance of `ApiResponse` serialized to XML.  Typewriter als
   </name-list>
 </ApiResponse>
 ```
-
-Checkout examples/.. for some examples of the generated code.
