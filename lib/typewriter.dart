@@ -5,3 +5,5 @@
 ///
 /// More dartdocs go here.
 library typewriter;
+
+export 'src/builder.dart';

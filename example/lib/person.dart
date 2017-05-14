@@ -1,32 +1,15 @@
-import 'package:typewriter/annotations/annotations.dart';
+library typewriter.example.person;
 
-@Json()
+import 'dart:convert';
+import 'package:typewriter/annotations.dart';
+part 'person.json.g.dart';
+
+@deriveJson()
 class Person {
   String name;
   int age;
   double money;
-  @PropertyJson('is_alive')
+  @jsonProperty('is_alive')
   bool isAlive;
-  Item item;
-  Dog dog;
   Symbol opaque;
-}
-
-@Json()
-@Xml()
-class Item {
-  String name;
-  int id;
-  String description;
-  RegExp why;
-
-  @Ignore()
-  String other;
-}
-
-@Json()
-class Dog {
-  List<String> names;
-  double age;
-  DateTime birthday;
 }

@@ -20,7 +20,6 @@ class ClassUsingExtendsKeywordException implements Exception {
 class ClassNoArgConstructorException implements Exception {
   final String _className;
 
-  ///
   const ClassNoArgConstructorException(this._className);
 
   @override
@@ -33,7 +32,6 @@ class ClassNoArgConstructorException implements Exception {
 class ClassFinalFieldException implements Exception {
   final String _className;
 
-  ///
   const ClassFinalFieldException(this._className);
 
   @override
