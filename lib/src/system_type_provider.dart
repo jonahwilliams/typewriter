@@ -10,7 +10,6 @@ class SystemTypeProvider {
       _xmlElement,
       _xmlAttribute;
 
-
   /// Builds a new [SystemTypeProvider] from the package:typewriter
   /// annotation library element.
   factory SystemTypeProvider(LibraryElement library) {

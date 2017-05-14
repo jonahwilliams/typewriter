@@ -7,4 +7,3 @@
 library typewriter;
 
 export 'src/builder.dart';
-
